@@ -1,0 +1,50 @@
+<!-- REPLACE this section in your admin.html file -->
+
+<!-- Warranty Numbers Tab -->
+<div id="warranty-numbers" class="tab-pane">
+    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+        <h3>Warranty Number Management</h3>
+        <div>
+            <button class="btn btn-primary" onclick="openAddWarrantyModal()">Add Single</button>
+            <a href="bulk-upload.html" class="btn btn-success" style="text-decoration: none;">Bulk Upload</a>
+        </div>
+    </div>
+    
+    <div class="filters">
+        <div>
+            <label>Product:</label>
+            <select id="productFilter" onchange="loadWarrantyNumbers()">
+                <option value="">All Products</option>
+                <option value="th11">TH11 Headset</option>
+                <option value="g7">G7 Headset</option>
+                <option value="g10">G10 Headset</option>
+            </select>
+        </div>
+        <div>
+            <label>Status:</label>
+            <select id="statusFilter" onchange="loadWarrantyNumbers()">
+                <option value="">All</option>
+                <option value="false">Unused</option>
+                <option value="true">Used</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="table-container">
+        <table id="warrantyNumbersTable">
+            <thead>
+                <tr>
+                    <th>Warranty Number</th>
+                    <th>Product</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Used By</th>
+                </tr>
+            </thead>
+            <tbody id="warrantyNumbersBody">
+                <!-- Data will be loaded here -->
+            </tbody>
+        </table>
+    </div>
+    <div id="warrantyPagination" class="pagination"></div>
+</div>
