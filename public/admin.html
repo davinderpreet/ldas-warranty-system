@@ -530,24 +530,29 @@
         <div class="modal-content">
             <span class="close" onclick="closeModal('uploadModal')">&times;</span>
             <h3>Bulk Upload Warranty Numbers</h3>
-            <p>Upload a CSV file with columns: warrantyNumber, productId, productName</p>
-           <div class="file-upload-area" id="fileUploadArea">
-    <p>Click here or drag and drop your CSV file</p>
-    <input type="file" id="csvFile" accept=".csv" style="display: none;">
-</div>
-<button id="uploadBtn" class="btn btn-primary" onclick="handleUpload()" disabled>Upload</button>
+            <p><strong>CSV Format:</strong> warrantyNumber,productId,productName</p>
+            <p><strong>Example:</strong></p>
+            <pre style="background: #f3f4f6; padding: 10px; border-radius: 5px; font-size: 12px;">12345,th11,LDAS TH11 Headset
+12346,g7,LDAS G7 Headset
+12347,g10,LDAS G10 Headset</pre>
+            <div class="file-upload-area" id="fileUploadArea">
+                <p>Click here or drag and drop your CSV file</p>
+                <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+            </div>
+            <button id="uploadBtn" class="btn btn-primary" onclick="uploadCSV()" disabled>Upload</button>
             <div id="uploadError" class="alert alert-error hidden"></div>
             <div id="uploadSuccess" class="alert alert-success hidden"></div>
         </div>
     </div>
 
     <script>
+        // Global variables
         const API_BASE = 'https://ldas-warranty-system.onrender.com/api';
         let currentToken = localStorage.getItem('adminToken');
         let currentPage = 1;
         let debounceTimer;
 
-        // Initialize
+        // Initialize when page loads
         document.addEventListener('DOMContentLoaded', function() {
             if (currentToken) {
                 showAdminPanel();
@@ -555,11 +560,11 @@
             } else {
                 showLogin();
             }
-
             setupFileUpload();
             setupProductNameMapping();
         });
 
+        // Show/hide panels
         function showLogin() {
             document.getElementById('loginContainer').classList.remove('hidden');
             document.getElementById('adminPanel').classList.add('hidden');
@@ -648,23 +653,23 @@
             const statsGrid = document.getElementById('statsGrid');
             statsGrid.innerHTML = `
                 <div class="stat-card">
-                    <div class="stat-number" style="color: #10b981;">${stats.totalWarrantyNumbers}</div>
+                    <div class="stat-number" style="color: #10b981;">${stats.totalWarrantyNumbers || 0}</div>
                     <div class="stat-label">Total Warranty Numbers</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" style="color: #6b7280;">${stats.availableWarrantyNumbers}</div>
+                    <div class="stat-number" style="color: #6b7280;">${stats.availableWarrantyNumbers || 0}</div>
                     <div class="stat-label">Available Numbers</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" style="color: #3b82f6;">${stats.totalRegistrations}</div>
+                    <div class="stat-number" style="color: #3b82f6;">${stats.totalRegistrations || 0}</div>
                     <div class="stat-label">Total Registrations</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" style="color: #22c55e;">${stats.activeWarranties}</div>
+                    <div class="stat-number" style="color: #22c55e;">${stats.activeWarranties || 0}</div>
                     <div class="stat-label">Active Warranties</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-number" style="color: #f59e0b;">${stats.recentRegistrations}</div>
+                    <div class="stat-number" style="color: #f59e0b;">${stats.recentRegistrations || 0}</div>
                     <div class="stat-label">Last 7 Days</div>
                 </div>
             `;
@@ -804,8 +809,10 @@
                 hideAlert('addWarrantySuccess');
             }
             if (modalId === 'uploadModal') {
-                document.getElementById('csvFile').value = '';
+                const fileInput = document.getElementById('csvFileInput');
+                if (fileInput) fileInput.value = '';
                 document.getElementById('uploadBtn').disabled = true;
+                document.getElementById('fileUploadArea').innerHTML = '<p>Click here or drag and drop your CSV file</p>';
                 hideAlert('uploadError');
                 hideAlert('uploadSuccess');
             }
@@ -862,7 +869,7 @@
         // File upload setup
         function setupFileUpload() {
             const fileUploadArea = document.getElementById('fileUploadArea');
-            const fileInput = document.getElementById('csvFile');
+            const fileInput = document.getElementById('csvFileInput');
             const uploadBtn = document.getElementById('uploadBtn');
 
             fileUploadArea.addEventListener('click', () => fileInput.click());
@@ -874,6 +881,7 @@
                 }
             });
 
+            // Drag and drop
             fileUploadArea.addEventListener('dragover', function(e) {
                 e.preventDefault();
                 this.classList.add('dragover');
@@ -888,7 +896,7 @@
                 this.classList.remove('dragover');
                 
                 const files = e.dataTransfer.files;
-                if (files.length > 0 && files[0].type === 'text/csv') {
+                if (files.length > 0 && files[0].name.toLowerCase().endsWith('.csv')) {
                     fileInput.files = files;
                     this.innerHTML = `<p>Selected: ${files[0].name}</p>`;
                     uploadBtn.disabled = false;
@@ -896,66 +904,74 @@
             });
         }
 
-        // Upload CSV
-      function handleUpload() {
-    // Add small delay to ensure modal is fully rendered
-    setTimeout(() => {
-        uploadCSV();
-    }, 100);
-}
+        // Upload CSV - FIXED VERSION
+        async function uploadCSV() {
+            console.log('Upload function called');
+            
+            const fileInput = document.getElementById('csvFileInput');
+            console.log('File input element:', fileInput);
+            
+            if (!fileInput) {
+                showError('uploadError', 'File input not found. Please refresh and try again.');
+                return;
+            }
+            
+            if (!fileInput.files || fileInput.files.length === 0) {
+                showError('uploadError', 'Please select a CSV file first');
+                return;
+            }
+            
+            const file = fileInput.files[0];
+            console.log('Selected file:', file);
 
-async function uploadCSV() {
-    console.log('Upload function called');
-    
-    const fileInput = document.getElementById('csvFile');
-    console.log('File input element:', fileInput);
-    
-    if (!fileInput) {
-        alert('File input not found! Please close and reopen the upload dialog.');
-        return;
-    }
-    
-    if (!fileInput.files || fileInput.files.length === 0) {
-        alert('Please select a CSV file first');
-        return;
-    }
-    
-    const file = fileInput.files[0];
-    console.log('Selected file:', file);
+            if (!file.name.toLowerCase().endsWith('.csv')) {
+                showError('uploadError', 'Please select a CSV file');
+                return;
+            }
 
-    if (!file.name.toLowerCase().endsWith('.csv')) {
-        alert('Please select a CSV file');
-        return;
-    }
+            // Show uploading state
+            const uploadBtn = document.getElementById('uploadBtn');
+            const originalText = uploadBtn.textContent;
+            uploadBtn.textContent = 'Uploading...';
+            uploadBtn.disabled = true;
 
-    const formData = new FormData();
-    formData.append('csv', file);
+            const formData = new FormData();
+            formData.append('csv', file);
 
-    try {
-        const token = localStorage.getItem('adminToken');
-        console.log('Using token:', token ? 'Token found' : 'No token');
-        
-        const response = await fetch('https://ldas-warranty-system.onrender.com/api/admin/warranty-numbers/upload', {
-            method: 'POST',
-            headers: { 'Authorization': `Bearer ${token}` },
-            body: formData
-        });
+            try {
+                const response = await fetch(`${API_BASE}/admin/warranty-numbers/upload`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${currentToken}` },
+                    body: formData
+                });
 
-        const data = await response.json();
-        console.log('Upload response:', data);
+                const data = await response.json();
+                console.log('Upload response:', data);
 
-        if (response.ok) {
-            alert('Upload successful: ' + data.message);
-            loadWarrantyNumbers();
-            closeModal('uploadModal');
-        } else {
-            alert('Upload failed: ' + data.error);
+                if (response.ok) {
+                    let message = data.message;
+                    if (data.errors && data.errors.length > 0) {
+                        message += `\n\nErrors:\n${data.errors.join('\n')}`;
+                    }
+                    showSuccess('uploadSuccess', message);
+                    loadWarrantyNumbers();
+                    
+                    // Reset form
+                    fileInput.value = '';
+                    document.getElementById('fileUploadArea').innerHTML = '<p>Click here or drag and drop your CSV file</p>';
+                } else {
+                    showError('uploadError', data.error || 'Upload failed');
+                }
+            } catch (error) {
+                console.error('Upload error:', error);
+                showError('uploadError', 'Upload failed: ' + error.message);
+            } finally {
+                // Reset button
+                uploadBtn.textContent = originalText;
+                uploadBtn.disabled = false;
+            }
         }
-    } catch (error) {
-        console.error('Upload error:', error);
-        alert('Upload failed: ' + error.message);
-    }
-}
+
         // Export registrations
         async function exportRegistrations() {
             try {
@@ -975,7 +991,7 @@ async function uploadCSV() {
                     alert('Export failed');
                 }
             } catch (error) {
-                alert('Export failed');
+                alert('Export failed: ' + error.message);
             }
         }
 
@@ -990,18 +1006,25 @@ async function uploadCSV() {
         // Utility functions
         function showError(elementId, message) {
             const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.classList.remove('hidden');
+            if (element) {
+                element.textContent = message;
+                element.classList.remove('hidden');
+            }
         }
 
         function showSuccess(elementId, message) {
             const element = document.getElementById(elementId);
-            element.textContent = message;
-            element.classList.remove('hidden');
+            if (element) {
+                element.textContent = message;
+                element.classList.remove('hidden');
+            }
         }
 
         function hideAlert(elementId) {
-            document.getElementById(elementId).classList.add('hidden');
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.add('hidden');
+            }
         }
 
         // Close modals when clicking outside
@@ -1016,4 +1039,3 @@ async function uploadCSV() {
     </script>
 </body>
 </html>
-            
