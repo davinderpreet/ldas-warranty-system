@@ -1,2 +1,2 @@
 # ldas-warranty-system
-LDAS Warranty Management Syste
+LDAS Warranty Management System
