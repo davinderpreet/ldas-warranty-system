@@ -897,42 +897,65 @@
         }
 
         // Upload CSV
-        async function uploadCSV() {
-            const fileInput = document.getElementById('csvFile');
-            const file = fileInput.files[0];
+      async function uploadCSV() {
+    const fileInput = document.getElementById('csvFile');
+    
+    // Debug: Check if element exists
+    if (!fileInput) {
+        showError('uploadError', 'File input not found. Please try again.');
+        return;
+    }
+    
+    if (!fileInput.files || fileInput.files.length === 0) {
+        showError('uploadError', 'Please select a CSV file first');
+        return;
+    }
+    
+    const file = fileInput.files[0];
 
-            if (!file) {
-                showError('uploadError', 'Please select a file');
-                return;
+    if (!file) {
+        showError('uploadError', 'Please select a file');
+        return;
+    }
+
+    // Check file type
+    if (!file.name.toLowerCase().endsWith('.csv')) {
+        showError('uploadError', 'Please select a CSV file');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('csv', file);
+
+    try {
+        const response = await fetch(`${API_BASE}/admin/warranty-numbers/upload`, {
+            method: 'POST',
+            headers: { 'Authorization': `Bearer ${currentToken}` },
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            let message = data.message;
+            if (data.errors && data.errors.length > 0) {
+                message += `\n\nErrors:\n${data.errors.join('\n')}`;
             }
-
-            const formData = new FormData();
-            formData.append('csv', file);
-
-            try {
-                const response = await fetch(`${API_BASE}/admin/warranty-numbers/upload`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${currentToken}` },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    let message = data.message;
-                    if (data.errors && data.errors.length > 0) {
-                        message += `\n\nErrors:\n${data.errors.join('\n')}`;
-                    }
-                    showSuccess('uploadSuccess', message);
-                    loadWarrantyNumbers();
-                } else {
-                    showError('uploadError', data.error);
-                }
-            } catch (error) {
-                showError('uploadError', 'Upload failed');
-            }
+            showSuccess('uploadSuccess', message);
+            loadWarrantyNumbers();
+            
+            // Reset form
+            fileInput.value = '';
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('fileUploadArea').innerHTML = '<p>Click here or drag and drop your CSV file</p>';
+        } else {
+            showError('uploadError', data.error);
         }
-
+    } catch (error) {
+        console.error('Upload error:', error);
+        showError('uploadError', 'Upload failed: ' + error.message);
+    }
+}
         // Export registrations
         async function exportRegistrations() {
             try {
