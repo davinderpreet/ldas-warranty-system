@@ -531,11 +531,11 @@
             <span class="close" onclick="closeModal('uploadModal')">&times;</span>
             <h3>Bulk Upload Warranty Numbers</h3>
             <p>Upload a CSV file with columns: warrantyNumber, productId, productName</p>
-            <div class="file-upload-area" id="fileUploadArea">
-                <p>Click here or drag and drop your CSV file</p>
-                <input type="file" id="csvFile" accept=".csv" style="display: none;">
-            </div>
-            <button id="uploadBtn" class="btn btn-primary" onclick="uploadCSV()" disabled>Upload</button>
+           <div class="file-upload-area" id="fileUploadArea">
+    <p>Click here or drag and drop your CSV file</p>
+    <input type="file" id="csvFile" accept=".csv" style="display: none;">
+</div>
+<button id="uploadBtn" class="btn btn-primary" onclick="handleUpload()" disabled>Upload</button>
             <div id="uploadError" class="alert alert-error hidden"></div>
             <div id="uploadSuccess" class="alert alert-success hidden"></div>
         </div>
