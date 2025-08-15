@@ -1,50 +1,539 @@
-<!-- REPLACE this section in your admin.html file -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulk Upload Warranty Numbers - LDAS Admin</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: #fff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #10b981;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .nav-links {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .nav-links a {
+            color: #10b981;
+            text-decoration: none;
+            font-weight: 600;
+            margin: 0 15px;
+            padding: 10px 20px;
+            border: 2px solid #10b981;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-links a:hover {
+            background: #10b981;
+            color: white;
+        }
+        
+        .main-content {
+            background: #fff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-group {
+            margin-bottom: 25px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 16px;
+        }
+        
+        .form-group textarea {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            resize: vertical;
+            min-height: 200px;
+        }
+        
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .example-box {
+            background: #f0fdf4;
+            border: 1px solid #bbf7d0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        
+        .example-box h3 {
+            color: #16a34a;
+            margin-bottom: 10px;
+        }
+        
+        .example-code {
+            background: #1f2937;
+            color: #f9fafb;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            overflow-x: auto;
+        }
+        
+        .btn {
+            padding: 15px 30px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 5px;
+        }
+        
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #059669;
+            transform: translateY(-2px);
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn:disabled {
+            background: #d1d5db;
+            color: #9ca3af;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .progress-container {
+            margin: 20px 0;
+            display: none;
+        }
+        
+        .progress-bar {
+            background: #e5e7eb;
+            height: 12px;
+            border-radius: 6px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+        
+        .progress-fill {
+            background: #10b981;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+            border-radius: 6px;
+        }
+        
+        .progress-text {
+            text-align: center;
+            font-weight: 600;
+            color: #374151;
+        }
+        
+        .alert {
+            padding: 15px 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            font-weight: 500;
+        }
+        
+        .alert-success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .stats-box {
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        
+        .stats-number {
+            font-size: 24px;
+            font-weight: bold;
+            color: #10b981;
+        }
+        
+        .stats-label {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .product-info {
+            background: #f1f5f9;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 15px 0;
+        }
+        
+        .product-info strong {
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📦 Bulk Upload Warranty Numbers</h1>
+            <p>Add multiple warranty numbers at once using simple text format</p>
+        </div>
+        
+        <div class="nav-links">
+            <a href="admin.html">← Back to Admin Panel</a>
+            <a href="admin.html#warranty-numbers">View Warranty Numbers</a>
+        </div>
+        
+        <div class="main-content">
+            <div class="example-box">
+                <h3>📋 Format Instructions</h3>
+                <p>Enter one warranty number per line in this exact format:</p>
+                <div class="example-code">warrantyNumber,productId,productName</div>
+                
+                <div style="margin-top: 15px;">
+                    <strong>Example:</strong>
+                    <div class="example-code">12345,th11,LDAS TH11 Headset
+12346,g7,LDAS G7 Headset
+12347,g10,LDAS G10 Headset</div>
+                </div>
+                
+                <div class="product-info">
+                    <strong>Valid Product IDs:</strong><br>
+                    • <code>th11</code> = LDAS TH11 Headset<br>
+                    • <code>g7</code> = LDAS G7 Headset<br>
+                    • <code>g10</code> = LDAS G10 Headset
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="warrantyText">📝 Warranty Numbers (one per line):</label>
+                <textarea 
+                    id="warrantyText" 
+                    placeholder="12345,th11,LDAS TH11 Headset
+12346,g7,LDAS G7 Headset
+12347,g10,LDAS G10 Headset"
+                ></textarea>
+                <small style="color: #6b7280;">Tip: You can copy and paste from Excel or any spreadsheet</small>
+            </div>
+            
+            <div style="text-align: center;">
+                <button id="validateBtn" class="btn btn-secondary" onclick="validateInput()">
+                    🔍 Validate Format
+                </button>
+                <button id="uploadBtn" class="btn btn-primary" onclick="processWarranties()" disabled>
+                    🚀 Upload All Warranty Numbers
+                </button>
+            </div>
+            
+            <div id="validationResult" class="hidden"></div>
+            
+            <div id="progressContainer" class="progress-container">
+                <div class="progress-bar">
+                    <div id="progressFill" class="progress-fill"></div>
+                </div>
+                <div id="progressText" class="progress-text">Processing...</div>
+            </div>
+            
+            <div id="resultContainer" class="hidden"></div>
+        </div>
+    </div>
 
-<!-- Warranty Numbers Tab -->
-<div id="warranty-numbers" class="tab-pane">
-    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
-        <h3>Warranty Number Management</h3>
-        <div>
-            <button class="btn btn-primary" onclick="openAddWarrantyModal()">Add Single</button>
-            <a href="bulk-upload.html" class="btn btn-success" style="text-decoration: none;">Bulk Upload</a>
-        </div>
-    </div>
-    
-    <div class="filters">
-        <div>
-            <label>Product:</label>
-            <select id="productFilter" onchange="loadWarrantyNumbers()">
-                <option value="">All Products</option>
-                <option value="th11">TH11 Headset</option>
-                <option value="g7">G7 Headset</option>
-                <option value="g10">G10 Headset</option>
-            </select>
-        </div>
-        <div>
-            <label>Status:</label>
-            <select id="statusFilter" onchange="loadWarrantyNumbers()">
-                <option value="">All</option>
-                <option value="false">Unused</option>
-                <option value="true">Used</option>
-            </select>
-        </div>
-    </div>
+    <script>
+        const API_BASE = 'https://ldas-warranty-system.onrender.com/api';
+        let currentToken = localStorage.getItem('adminToken');
+        let validatedWarranties = [];
 
-    <div class="table-container">
-        <table id="warrantyNumbersTable">
-            <thead>
-                <tr>
-                    <th>Warranty Number</th>
-                    <th>Product</th>
-                    <th>Status</th>
-                    <th>Created</th>
-                    <th>Used By</th>
-                </tr>
-            </thead>
-            <tbody id="warrantyNumbersBody">
-                <!-- Data will be loaded here -->
-            </tbody>
-        </table>
-    </div>
-    <div id="warrantyPagination" class="pagination"></div>
-</div>
+        // Check if user is logged in
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!currentToken) {
+                alert('Please login first!');
+                window.location.href = 'admin.html';
+                return;
+            }
+        });
+
+        function validateInput() {
+            const textarea = document.getElementById('warrantyText');
+            const text = textarea.value.trim();
+            
+            if (!text) {
+                showResult('Please enter warranty numbers to validate.', 'error');
+                return;
+            }
+
+            const lines = text.split('\n').filter(line => line.trim());
+            const warranties = [];
+            const errors = [];
+            const duplicates = new Set();
+
+            for (let i = 0; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                const parts = line.split(',');
+                if (parts.length !== 3) {
+                    errors.push(`Line ${i + 1}: Invalid format - needs exactly 3 parts separated by commas`);
+                    continue;
+                }
+
+                const [warrantyNumber, productId, productName] = parts.map(p => p.trim());
+                
+                // Validate warranty number (4-5 digits)
+                if (!/^\d{4,5}$/.test(warrantyNumber)) {
+                    errors.push(`Line ${i + 1}: Warranty number "${warrantyNumber}" must be 4-5 digits only`);
+                    continue;
+                }
+
+                // Check for duplicates in input
+                if (duplicates.has(warrantyNumber)) {
+                    errors.push(`Line ${i + 1}: Duplicate warranty number "${warrantyNumber}"`);
+                    continue;
+                }
+                duplicates.add(warrantyNumber);
+
+                // Validate product ID
+                const validProducts = {
+                    'th11': 'LDAS TH11 Headset',
+                    'g7': 'LDAS G7 Headset',
+                    'g10': 'LDAS G10 Headset'
+                };
+                
+                if (!validProducts[productId.toLowerCase()]) {
+                    errors.push(`Line ${i + 1}: Invalid product ID "${productId}" - must be th11, g7, or g10`);
+                    continue;
+                }
+
+                warranties.push({ 
+                    warrantyNumber, 
+                    productId: productId.toLowerCase(), 
+                    productName: productName.trim()
+                });
+            }
+
+            // Show validation results
+            let resultHTML = '';
+            
+            if (warranties.length > 0) {
+                resultHTML += `<div class="alert alert-success">
+                    ✅ <strong>${warranties.length} valid warranty numbers found!</strong>
+                </div>`;
+                
+                resultHTML += `<div class="stats-box">
+                    <div class="stats-number">${warranties.length}</div>
+                    <div class="stats-label">Ready to Upload</div>
+                </div>`;
+
+                validatedWarranties = warranties;
+                document.getElementById('uploadBtn').disabled = false;
+            }
+
+            if (errors.length > 0) {
+                resultHTML += `<div class="alert alert-error">
+                    ❌ <strong>${errors.length} errors found:</strong><br>
+                    ${errors.slice(0, 10).map(err => `• ${err}`).join('<br>')}
+                    ${errors.length > 10 ? `<br>• ... and ${errors.length - 10} more errors` : ''}
+                </div>`;
+                
+                if (warranties.length === 0) {
+                    document.getElementById('uploadBtn').disabled = true;
+                }
+            }
+
+            if (warranties.length === 0 && errors.length === 0) {
+                resultHTML = `<div class="alert alert-warning">
+                    ⚠️ No warranty numbers found. Please check your input.
+                </div>`;
+            }
+
+            const resultDiv = document.getElementById('validationResult');
+            resultDiv.innerHTML = resultHTML;
+            resultDiv.classList.remove('hidden');
+        }
+
+        async function processWarranties() {
+            if (validatedWarranties.length === 0) {
+                alert('Please validate your input first!');
+                return;
+            }
+
+            // Show progress container
+            document.getElementById('progressContainer').style.display = 'block';
+            document.getElementById('uploadBtn').disabled = true;
+            document.getElementById('uploadBtn').textContent = '⏳ Processing...';
+
+            let successCount = 0;
+            let failCount = 0;
+            const failedItems = [];
+
+            // Process warranties one by one
+            for (let i = 0; i < validatedWarranties.length; i++) {
+                const warranty = validatedWarranties[i];
+                
+                // Update progress
+                const progress = ((i + 1) / validatedWarranties.length) * 100;
+                document.getElementById('progressFill').style.width = progress + '%';
+                document.getElementById('progressText').textContent = 
+                    `Processing ${i + 1} of ${validatedWarranties.length} - ${warranty.warrantyNumber}`;
+
+                try {
+                    const response = await fetch(`${API_BASE}/admin/warranty-numbers`, {
+                        method: 'POST',
+                        headers: {
+                            'Authorization': `Bearer ${currentToken}`,
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(warranty)
+                    });
+
+                    if (response.ok) {
+                        successCount++;
+                    } else {
+                        const data = await response.json();
+                        failCount++;
+                        failedItems.push(`${warranty.warrantyNumber}: ${data.error}`);
+                    }
+                } catch (error) {
+                    failCount++;
+                    failedItems.push(`${warranty.warrantyNumber}: Network error`);
+                }
+
+                // Small delay to prevent overwhelming the server
+                await new Promise(resolve => setTimeout(resolve, 200));
+            }
+
+            // Hide progress and show results
+            document.getElementById('progressContainer').style.display = 'none';
+            document.getElementById('uploadBtn').disabled = false;
+            document.getElementById('uploadBtn').textContent = '🚀 Upload All Warranty Numbers';
+
+            // Build result message
+            let resultHTML = '';
+            
+            if (successCount > 0) {
+                resultHTML += `<div class="alert alert-success">
+                    🎉 <strong>Successfully added ${successCount} warranty numbers!</strong>
+                </div>`;
+                
+                // Clear the textarea on success
+                if (failCount === 0) {
+                    document.getElementById('warrantyText').value = '';
+                    validatedWarranties = [];
+                    document.getElementById('uploadBtn').disabled = true;
+                    document.getElementById('validationResult').classList.add('hidden');
+                }
+            }
+
+            if (failCount > 0) {
+                resultHTML += `<div class="alert alert-error">
+                    ❌ <strong>${failCount} warranties failed to upload:</strong><br>
+                    ${failedItems.slice(0, 10).map(item => `• ${item}`).join('<br>')}
+                    ${failedItems.length > 10 ? `<br>• ... and ${failedItems.length - 10} more` : ''}
+                </div>`;
+            }
+
+            resultHTML += `<div style="text-align: center; margin-top: 20px;">
+                <a href="admin.html#warranty-numbers" class="btn btn-primary">
+                    📋 View All Warranty Numbers
+                </a>
+            </div>`;
+
+            const resultDiv = document.getElementById('resultContainer');
+            resultDiv.innerHTML = resultHTML;
+            resultDiv.classList.remove('hidden');
+
+            // Scroll to results
+            resultDiv.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function showResult(message, type) {
+            const resultDiv = document.getElementById('validationResult');
+            resultDiv.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+            resultDiv.classList.remove('hidden');
+        }
+
+        // Auto-resize textarea
+        document.getElementById('warrantyText').addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = Math.max(200, this.scrollHeight) + 'px';
+        });
+    </script>
+</body>
+</html>
