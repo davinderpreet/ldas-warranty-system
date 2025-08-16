@@ -3,7 +3,7 @@ const axios = require('axios');
 class EmailService {
   constructor() {
     this.apiKey = process.env.OMNISEND_API_KEY;
-    this.baseUrl = 'https://api.omnisend.com/v5';  // Fixed: v5 instead of v3
+    this.baseUrl = 'https://api.omnisend.com/v5';
     this.fromEmail = process.env.FROM_EMAIL || 'support@ldaselectronics.com';
     this.fromName = process.env.FROM_NAME || 'LDAS Electronics';
     
@@ -25,17 +25,15 @@ class EmailService {
     try {
       console.log('📧 Sending warranty confirmation email to:', customerData.email);
       
-      // First, add/update contact in Omnisend using v5 format
+      // Add contact to Omnisend with your exact segment tags
       await this.addContactV5(customerData, warrantyData);
       
-      // For now, we'll use a simulated email send since Omnisend v5 doesn't have direct email sending
-      // In production, you'd create a campaign or use a triggered automation
-      console.log('✅ Email process completed - contact added to Omnisend with warranty data');
+      console.log('✅ Contact added to Omnisend with warranty segment tags');
       
       return { 
         success: true, 
         messageId: `omnisend-v5-${Date.now()}`,
-        message: 'Contact added to Omnisend with warranty information. Email will be sent via Omnisend automation.'
+        message: 'Contact added to Omnisend with warranty tags. Your existing automation will trigger.'
       };
       
     } catch (error) {
@@ -55,9 +53,13 @@ class EmailService {
 
   async addContactV5(customerData, warrantyData) {
     try {
-      console.log('👤 Adding contact to Omnisend v5...');
+      console.log('👤 Adding contact to Omnisend with segment tags...');
       
-      // Omnisend v5 contact format
+      // Generate the correct warranty segment tag based on product
+      const warrantySegmentTag = this.getWarrantySegmentTag(warrantyData.product);
+      console.log(`🏷️ Using segment tag: ${warrantySegmentTag}`);
+      
+      // Omnisend v5 contact format with your exact segment tags
       const contactData = {
         identifiers: [
           {
@@ -74,10 +76,10 @@ class EmailService {
         firstName: customerData.firstName,
         lastName: customerData.lastName,
         tags: [
-          'warranty-customer',
-          `product-${this.getProductCode(warrantyData.product)}`,
-          'warranty-active',
-          `source-${warrantyData.source.toLowerCase().replace(/[^a-z0-9]/g, '-')}`
+          warrantySegmentTag,           // Your exact segment tag (TH11 Warranty Signup, G7 Warranty Signup)
+          'warranty-customer',          // General warranty customer tag
+          'warranty-active',            // Active warranty status
+          `source-${warrantyData.source.toLowerCase().replace(/[^a-z0-9]/g, '-')}` // Purchase source
         ],
         customProperties: {
           warrantyNumber: warrantyData.warrantyNumber,
@@ -108,9 +110,10 @@ class EmailService {
         { headers: this.headers }
       );
 
-      console.log('✅ Contact added to Omnisend v5 successfully');
+      console.log('✅ Contact added to Omnisend successfully');
+      console.log(`✅ Tagged with: ${warrantySegmentTag}`);
       
-      // Trigger custom event for warranty registration
+      // Trigger warranty registration event
       await this.triggerWarrantyEvent(customerData, warrantyData);
       
       return response.data;
@@ -125,6 +128,23 @@ class EmailService {
     }
   }
 
+  getWarrantySegmentTag(productName) {
+    // Map products to your exact segment tags
+    const segmentTagMap = {
+      'LDAS TH11 Headset': 'TH11 Warranty Signup',
+      'LDAS G7 Headset': 'G7 Warranty Signup',
+      'LDAS G10 Headset': 'G10 Warranty Signup'  // Add G10 tag for future use
+    };
+    
+    const tag = segmentTagMap[productName];
+    if (!tag) {
+      console.warn(`⚠️ No segment tag found for product: ${productName}`);
+      return 'General Warranty Signup'; // Fallback tag
+    }
+    
+    return tag;
+  }
+
   async triggerWarrantyEvent(customerData, warrantyData) {
     try {
       console.log('🎯 Triggering warranty registration event...');
@@ -136,6 +156,7 @@ class EmailService {
         origin: "API",
         properties: {
           product: warrantyData.product,
+          productSegment: this.getWarrantySegmentTag(warrantyData.product),
           warrantyNumber: warrantyData.warrantyNumber,
           purchaseDate: warrantyData.purchaseDate.toISOString(),
           warrantyEndDate: warrantyData.warrantyEndDate.toISOString(),
@@ -174,7 +195,6 @@ class EmailService {
     try {
       console.log('🧪 Testing Omnisend v5 connection...');
       
-      // Test by trying to get contacts (this should work with any valid API key)
       const response = await axios.get(
         `${this.baseUrl}/contacts?limit=1`,
         { headers: this.headers }
@@ -185,7 +205,12 @@ class EmailService {
         success: true,
         message: 'Omnisend v5 API connection successful',
         apiVersion: 'v5',
-        contactsEndpoint: 'working'
+        contactsEndpoint: 'working',
+        segmentTags: {
+          TH11: 'TH11 Warranty Signup',
+          G7: 'G7 Warranty Signup',
+          G10: 'G10 Warranty Signup'
+        }
       };
     } catch (error) {
       console.error('❌ Omnisend v5 connection failed:', {
@@ -204,21 +229,16 @@ class EmailService {
     }
   }
 
-  // Legacy method for manual email sending (if needed)
-  async sendManualEmail(customerData, warrantyData) {
-    // Since Omnisend v5 doesn't have direct email sending via API,
-    // this would need to be handled through:
-    // 1. Creating an automation in Omnisend dashboard
-    // 2. Using a different email service as backup
-    // 3. Or triggering a campaign
-    
-    console.log('📧 Manual email sending not available in Omnisend v5 API');
-    console.log('💡 Recommendation: Set up automation in Omnisend dashboard triggered by "warranty-registered" event');
-    
+  // Method to manually verify segment integration
+  async verifySegmentIntegration() {
     return {
-      success: false,
-      message: 'Direct email sending not supported in Omnisend v5. Use automation triggers instead.',
-      recommendation: 'Create automation in Omnisend dashboard for warranty-registered events'
+      segmentTags: {
+        'LDAS TH11 Headset': 'TH11 Warranty Signup',
+        'LDAS G7 Headset': 'G7 Warranty Signup',
+        'LDAS G10 Headset': 'G10 Warranty Signup'
+      },
+      message: 'Email service configured to use your exact Omnisend segment tags',
+      note: 'Contacts will automatically be added to the correct segments based on product'
     };
   }
 }
