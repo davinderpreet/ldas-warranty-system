@@ -301,8 +301,6 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// ===== ENHANCED REGISTRATION CRUD OPERATIONS =====
-
 // Get all registrations with filtering and pagination
 app.get('/api/admin/registrations', authenticateAdmin, async (req, res) => {
   try {
@@ -427,10 +425,7 @@ app.delete('/api/admin/registrations/:id', authenticateAdmin, async (req, res) =
   }
 });
 
-// Unlink warranty number from registration
-// Alternative: Modify the WarrantyRegistration schema to make warrantyNumber optional
-// Then use this unlink function:
-
+// Unlink warranty number from registration - FIXED VERSION
 app.post('/api/admin/registrations/:id/unlink', authenticateAdmin, async (req, res) => {
   try {
     const registrationId = req.params.id;
@@ -452,31 +447,12 @@ app.post('/api/admin/registrations/:id/unlink', authenticateAdmin, async (req, r
       }
     );
 
-    // Update registration to remove warranty number and mark as unlinked
-    await WarrantyRegistration.findByIdAndUpdate(registrationId, {
-      warrantyNumber: 'UNLINKED-' + warrantyNumberToFree, // Keep reference but mark as unlinked
-      status: 'expired' // Mark as expired since no valid warranty
-    });
+    // Delete the registration entirely (since warranty number is required)
+    await WarrantyRegistration.findByIdAndDelete(registrationId);
 
     res.json({ 
-      message: 'Warranty number unlinked successfully',
+      message: 'Warranty number unlinked successfully and registration removed',
       freedWarrantyNumber: warrantyNumberToFree
-    });
-  } catch (error) {
-    if (error.name === 'CastError') {
-      return res.status(400).json({ error: 'Invalid registration ID' });
-    }
-    res.status(500).json({ error: error.message });
-  }
-});
-    // Update registration to remove warranty number
-    registration.warrantyNumber = null;
-    registration.status = 'expired'; // Mark as expired since no warranty number
-    await registration.save();
-
-    res.json({ 
-      message: 'Warranty number unlinked successfully',
-      freedWarrantyNumber: registration.warrantyNumber
     });
   } catch (error) {
     if (error.name === 'CastError') {
