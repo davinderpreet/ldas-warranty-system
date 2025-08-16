@@ -301,7 +301,9 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Warranty Registration Management
+// ===== ENHANCED REGISTRATION CRUD OPERATIONS =====
+
+// Get all registrations with filtering and pagination
 app.get('/api/admin/registrations', authenticateAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -330,6 +332,134 @@ app.get('/api/admin/registrations', authenticateAdmin, async (req, res) => {
       }
     });
   } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single registration by ID
+app.get('/api/admin/registrations/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const registration = await WarrantyRegistration.findById(req.params.id);
+    
+    if (!registration) {
+      return res.status(404).json({ error: 'Registration not found' });
+    }
+
+    res.json(registration);
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid registration ID' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update registration
+app.put('/api/admin/registrations/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const registrationId = req.params.id;
+    const updateData = req.body;
+
+    // Don't allow changing warranty number through this endpoint
+    delete updateData.warrantyNumber;
+
+    // Calculate warranty end date if purchase date is updated
+    if (updateData.purchaseDate) {
+      const warrantyEndDate = new Date(updateData.purchaseDate);
+      warrantyEndDate.setFullYear(warrantyEndDate.getFullYear() + 1);
+      updateData.warrantyEndDate = warrantyEndDate;
+    }
+
+    const updatedRegistration = await WarrantyRegistration.findByIdAndUpdate(
+      registrationId,
+      updateData,
+      { new: true, runValidators: true }
+    );
+
+    if (!updatedRegistration) {
+      return res.status(404).json({ error: 'Registration not found' });
+    }
+
+    res.json(updatedRegistration);
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid registration ID' });
+    }
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Delete registration
+app.delete('/api/admin/registrations/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const registrationId = req.params.id;
+    
+    const registration = await WarrantyRegistration.findById(registrationId);
+    if (!registration) {
+      return res.status(404).json({ error: 'Registration not found' });
+    }
+
+    // Free up the warranty number when deleting registration
+    await WarrantyNumber.findOneAndUpdate(
+      { warrantyNumber: registration.warrantyNumber },
+      { 
+        isUsed: false, 
+        usedAt: null, 
+        registrationId: null 
+      }
+    );
+
+    // Delete the registration
+    await WarrantyRegistration.findByIdAndDelete(registrationId);
+
+    res.json({ 
+      message: 'Registration deleted successfully',
+      freedWarrantyNumber: registration.warrantyNumber
+    });
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid registration ID' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Unlink warranty number from registration
+app.post('/api/admin/registrations/:id/unlink', authenticateAdmin, async (req, res) => {
+  try {
+    const registrationId = req.params.id;
+    
+    const registration = await WarrantyRegistration.findById(registrationId);
+    if (!registration) {
+      return res.status(404).json({ error: 'Registration not found' });
+    }
+
+    // Free up the warranty number
+    await WarrantyNumber.findOneAndUpdate(
+      { warrantyNumber: registration.warrantyNumber },
+      { 
+        isUsed: false, 
+        usedAt: null, 
+        registrationId: null 
+      }
+    );
+
+    // Update registration to remove warranty number
+    registration.warrantyNumber = null;
+    registration.status = 'expired'; // Mark as expired since no warranty number
+    await registration.save();
+
+    res.json({ 
+      message: 'Warranty number unlinked successfully',
+      freedWarrantyNumber: registration.warrantyNumber
+    });
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid registration ID' });
+    }
     res.status(500).json({ error: error.message });
   }
 });
