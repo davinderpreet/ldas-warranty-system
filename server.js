@@ -428,6 +428,9 @@ app.delete('/api/admin/registrations/:id', authenticateAdmin, async (req, res) =
 });
 
 // Unlink warranty number from registration
+// Alternative: Modify the WarrantyRegistration schema to make warrantyNumber optional
+// Then use this unlink function:
+
 app.post('/api/admin/registrations/:id/unlink', authenticateAdmin, async (req, res) => {
   try {
     const registrationId = req.params.id;
@@ -437,9 +440,11 @@ app.post('/api/admin/registrations/:id/unlink', authenticateAdmin, async (req, r
       return res.status(404).json({ error: 'Registration not found' });
     }
 
-    // Free up the warranty number
+    const warrantyNumberToFree = registration.warrantyNumber;
+
+    // Free up the warranty number in the WarrantyNumber collection
     await WarrantyNumber.findOneAndUpdate(
-      { warrantyNumber: registration.warrantyNumber },
+      { warrantyNumber: warrantyNumberToFree },
       { 
         isUsed: false, 
         usedAt: null, 
@@ -447,6 +452,23 @@ app.post('/api/admin/registrations/:id/unlink', authenticateAdmin, async (req, r
       }
     );
 
+    // Update registration to remove warranty number and mark as unlinked
+    await WarrantyRegistration.findByIdAndUpdate(registrationId, {
+      warrantyNumber: 'UNLINKED-' + warrantyNumberToFree, // Keep reference but mark as unlinked
+      status: 'expired' // Mark as expired since no valid warranty
+    });
+
+    res.json({ 
+      message: 'Warranty number unlinked successfully',
+      freedWarrantyNumber: warrantyNumberToFree
+    });
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid registration ID' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
     // Update registration to remove warranty number
     registration.warrantyNumber = null;
     registration.status = 'expired'; // Mark as expired since no warranty number
