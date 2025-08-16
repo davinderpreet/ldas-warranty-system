@@ -43,6 +43,7 @@ const WarrantyNumberSchema = new mongoose.Schema({
   registrationId: { type: mongoose.Schema.Types.ObjectId, ref: 'WarrantyRegistration' }
 });
 
+// Enhanced WarrantyRegistration Schema with Claims Support
 const WarrantyRegistrationSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -57,6 +58,11 @@ const WarrantyRegistrationSchema = new mongoose.Schema({
   warrantyStartDate: { type: Date, default: Date.now },
   warrantyEndDate: { type: Date },
   status: { type: String, enum: ['active', 'expired', 'claimed'], default: 'active' },
+  // Claims tracking fields
+  claimDate: { type: Date },
+  claimType: { type: String, enum: ['replacement', 'repair', 'refund', 'technical'] },
+  claimNotes: { type: String },
+  claimProcessedBy: { type: String },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -301,7 +307,7 @@ app.post('/api/register', async (req, res) => {
   }
 });
 
-// Get all registrations with filtering and pagination
+// ENHANCED REGISTRATIONS ENDPOINT WITH ADVANCED SEARCH
 app.get('/api/admin/registrations', authenticateAdmin, async (req, res) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -309,9 +315,42 @@ app.get('/api/admin/registrations', authenticateAdmin, async (req, res) => {
     const skip = (page - 1) * limit;
 
     const filter = {};
+    
+    // Existing filters
     if (req.query.productId) filter.productId = req.query.productId;
     if (req.query.status) filter.status = req.query.status;
     if (req.query.email) filter.email = new RegExp(req.query.email, 'i');
+    
+    // Enhanced search filters for the Find Customer feature
+    if (req.query.warrantyNumber) {
+      filter.warrantyNumber = new RegExp(req.query.warrantyNumber, 'i');
+    }
+    
+    if (req.query.orderId) {
+      filter.orderId = new RegExp(req.query.orderId, 'i');
+    }
+    
+    if (req.query.name) {
+      filter.$or = [
+        { fullName: new RegExp(req.query.name, 'i') },
+        { firstName: new RegExp(req.query.name, 'i') },
+        { lastName: new RegExp(req.query.name, 'i') }
+      ];
+    }
+    
+    // Universal search - searches across multiple fields
+    if (req.query.search) {
+      const searchTerm = req.query.search;
+      filter.$or = [
+        { email: new RegExp(searchTerm, 'i') },
+        { fullName: new RegExp(searchTerm, 'i') },
+        { firstName: new RegExp(searchTerm, 'i') },
+        { lastName: new RegExp(searchTerm, 'i') },
+        { warrantyNumber: new RegExp(searchTerm, 'i') },
+        { orderId: new RegExp(searchTerm, 'i') },
+        { product: new RegExp(searchTerm, 'i') }
+      ];
+    }
 
     const registrations = await WarrantyRegistration.find(filter)
       .skip(skip)
@@ -352,7 +391,7 @@ app.get('/api/admin/registrations/:id', authenticateAdmin, async (req, res) => {
   }
 });
 
-// Update registration
+// ENHANCED UPDATE REGISTRATION WITH CLAIMS SUPPORT
 app.put('/api/admin/registrations/:id', authenticateAdmin, async (req, res) => {
   try {
     const registrationId = req.params.id;
@@ -366,6 +405,20 @@ app.put('/api/admin/registrations/:id', authenticateAdmin, async (req, res) => {
       const warrantyEndDate = new Date(updateData.purchaseDate);
       warrantyEndDate.setFullYear(warrantyEndDate.getFullYear() + 1);
       updateData.warrantyEndDate = warrantyEndDate;
+    }
+
+    // Handle claim processing
+    if (updateData.status === 'claimed') {
+      updateData.claimDate = updateData.claimDate || new Date();
+      updateData.claimProcessedBy = req.admin.username;
+      
+      // Log the claim details
+      console.log(`Warranty claim processed for registration ${registrationId}:`, {
+        claimType: updateData.claimType,
+        claimNotes: updateData.claimNotes,
+        claimDate: updateData.claimDate,
+        processedBy: req.admin.username
+      });
     }
 
     const updatedRegistration = await WarrantyRegistration.findByIdAndUpdate(
@@ -425,7 +478,7 @@ app.delete('/api/admin/registrations/:id', authenticateAdmin, async (req, res) =
   }
 });
 
-// Unlink warranty number from registration - FIXED VERSION
+// Unlink warranty number from registration
 app.post('/api/admin/registrations/:id/unlink', authenticateAdmin, async (req, res) => {
   try {
     const registrationId = req.params.id;
@@ -462,6 +515,71 @@ app.post('/api/admin/registrations/:id/unlink', authenticateAdmin, async (req, r
   }
 });
 
+// ADVANCED CUSTOMER SEARCH ENDPOINT
+app.get('/api/admin/search/customers', authenticateAdmin, async (req, res) => {
+  try {
+    const { q, type = 'all', limit = 20 } = req.query;
+    
+    if (!q || q.trim().length < 2) {
+      return res.json({ results: [], message: 'Search query must be at least 2 characters' });
+    }
+
+    const searchTerm = q.trim();
+    let filter = {};
+
+    switch (type) {
+      case 'email':
+        filter = { email: new RegExp(searchTerm, 'i') };
+        break;
+      case 'name':
+        filter = {
+          $or: [
+            { fullName: new RegExp(searchTerm, 'i') },
+            { firstName: new RegExp(searchTerm, 'i') },
+            { lastName: new RegExp(searchTerm, 'i') }
+          ]
+        };
+        break;
+      case 'warranty':
+        filter = { warrantyNumber: new RegExp(searchTerm, 'i') };
+        break;
+      case 'order':
+        filter = { orderId: new RegExp(searchTerm, 'i') };
+        break;
+      case 'phone':
+        filter = { phone: new RegExp(searchTerm, 'i') };
+        break;
+      default:
+        // Search all fields
+        filter = {
+          $or: [
+            { email: new RegExp(searchTerm, 'i') },
+            { fullName: new RegExp(searchTerm, 'i') },
+            { firstName: new RegExp(searchTerm, 'i') },
+            { lastName: new RegExp(searchTerm, 'i') },
+            { warrantyNumber: new RegExp(searchTerm, 'i') },
+            { orderId: new RegExp(searchTerm, 'i') },
+            { product: new RegExp(searchTerm, 'i') }
+          ]
+        };
+    }
+
+    const results = await WarrantyRegistration.find(filter)
+      .limit(parseInt(limit))
+      .sort({ createdAt: -1 })
+      .select('fullName email product warrantyNumber orderId purchaseDate status source createdAt warrantyEndDate claimDate claimType');
+
+    res.json({
+      results,
+      count: results.length,
+      searchTerm,
+      searchType: type
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 // Export warranty data to CSV
 app.get('/api/admin/export/registrations', authenticateAdmin, async (req, res) => {
   try {
@@ -479,6 +597,9 @@ app.get('/api/admin/export/registrations', authenticateAdmin, async (req, res) =
         { id: 'purchaseDate', title: 'Purchase Date' },
         { id: 'warrantyEndDate', title: 'Warranty End Date' },
         { id: 'status', title: 'Status' },
+        { id: 'claimDate', title: 'Claim Date' },
+        { id: 'claimType', title: 'Claim Type' },
+        { id: 'claimNotes', title: 'Claim Notes' },
         { id: 'createdAt', title: 'Registration Date' }
       ]
     });
@@ -504,7 +625,7 @@ app.get('/api/admin/export/registrations', authenticateAdmin, async (req, res) =
   }
 });
 
-// Dashboard stats
+// Enhanced dashboard stats with claims data
 app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
   try {
     const totalWarrantyNumbers = await WarrantyNumber.countDocuments();
@@ -514,9 +635,16 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
       status: 'active',
       warrantyEndDate: { $gt: new Date() }
     });
+    const claimedWarranties = await WarrantyRegistration.countDocuments({ status: 'claimed' });
 
     const productStats = await WarrantyRegistration.aggregate([
       { $group: { _id: '$productId', count: { $sum: 1 }, product: { $first: '$product' } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    const claimStats = await WarrantyRegistration.aggregate([
+      { $match: { status: 'claimed' } },
+      { $group: { _id: '$claimType', count: { $sum: 1 } } },
       { $sort: { count: -1 } }
     ]);
 
@@ -525,6 +653,9 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
     const recentRegistrations = await WarrantyRegistration.countDocuments({
       createdAt: { $gte: sevenDaysAgo }
     });
+    const recentClaims = await WarrantyRegistration.countDocuments({
+      claimDate: { $gte: sevenDaysAgo }
+    });
 
     res.json({
       totalWarrantyNumbers,
@@ -532,17 +663,31 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
       availableWarrantyNumbers: totalWarrantyNumbers - usedWarrantyNumbers,
       totalRegistrations,
       activeWarranties,
+      claimedWarranties,
       recentRegistrations,
-      productStats
+      recentClaims,
+      productStats,
+      claimStats
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
+// Health check endpoint
+app.get('/api/health', (req, res) => {
+  res.json({ 
+    status: 'healthy', 
+    timestamp: new Date().toISOString(),
+    version: '2.0.0'
+  });
+});
+
 // Start server
 app.listen(PORT, async () => {
-  console.log(`Server running on port ${PORT}`);
+  console.log(`🚀 LDAS Warranty System running on port ${PORT}`);
+  console.log(`📊 Dashboard: http://localhost:${PORT}`);
+  console.log(`🔍 API Health: http://localhost:${PORT}/api/health`);
   await initializeAdmin();
 });
 
