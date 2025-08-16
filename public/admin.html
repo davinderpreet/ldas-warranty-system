@@ -740,6 +740,103 @@
                 const data = await response.json();
 
                 if (response.ok) {
+                    showSuccess('addWarrantySuccess', 'Warranty number added successfully!');
+                    document.getElementById('addWarrantyForm').reset();
+                    loadWarrantyNumbers();
+                    loadDashboard(); // Refresh stats
+                } else {
+                    showError('addWarrantyError', data.error);
+                }
+            } catch (error) {
+                showError('addWarrantyError', 'Failed to add warranty number');
+            }
+        });
+
+        // Product name mapping
+        function setupProductNameMapping() {
+            const productSelect = document.getElementById('productId');
+            const productNameInput = document.getElementById('productName');
+            
+            const productNames = {
+                'th11': 'LDAS TH11 Headset',
+                'g7': 'LDAS G7 Headset',
+                'g10': 'LDAS G10 Headset'
+            };
+
+            productSelect.addEventListener('change', function() {
+                productNameInput.value = productNames[this.value] || '';
+            });
+        }
+
+        // Export registrations
+        async function exportRegistrations() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/export/registrations`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'warranty_registrations.csv';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('Export failed');
+                }
+            } catch (error) {
+                alert('Export failed: ' + error.message);
+            }
+        }
+
+        // Debounced search
+        function debounceLoadRegistrations() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => {
+                loadRegistrations(1);
+            }, 500);
+        }
+
+        // Utility functions
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.classList.remove('hidden');
+            }
+        }
+
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.classList.remove('hidden');
+            }
+        }
+
+        function hideAlert(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.add('hidden');
+            }
+        }
+
+        // Close modals when clicking outside
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let modal of modals) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+    </script>
+</body>
+</html>json();
+
+                if (response.ok) {
                     currentToken = data.token;
                     localStorage.setItem('adminToken', currentToken);
                     document.getElementById('welcomeText').textContent = `Welcome, ${data.admin.username}`;
@@ -901,7 +998,7 @@
                         <td>${reg.fullName}</td>
                         <td>${reg.email}</td>
                         <td>${reg.product}</td>
-                        <td>${reg.warrantyNumber}</td>
+                        <td>${reg.warrantyNumber || 'N/A'}</td>
                         <td>${new Date(reg.purchaseDate).toLocaleDateString()}</td>
                         <td><span class="status-badge status-${status}">
                             ${status.charAt(0).toUpperCase() + status.slice(1)}
@@ -909,7 +1006,7 @@
                         <td>${new Date(reg.createdAt).toLocaleDateString()}</td>
                         <td class="actions-column">
                             <button class="btn btn-primary btn-sm" onclick="editRegistration('${reg._id}')">Edit</button>
-                            <button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">Unlink</button>
+                            ${reg.warrantyNumber ? `<button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">Unlink</button>` : ''}
                             <button class="btn btn-danger btn-sm" onclick="deleteRegistration('${reg._id}', '${reg.fullName}')">Delete</button>
                         </td>
                     </tr>
@@ -945,7 +1042,7 @@
             document.getElementById('editProduct').value = registration.productId;
             document.getElementById('editSource').value = registration.source;
             document.getElementById('editOrderId').value = registration.orderId;
-            document.getElementById('editWarrantyNumber').value = registration.warrantyNumber;
+            document.getElementById('editWarrantyNumber').value = registration.warrantyNumber || '';
             document.getElementById('editPurchaseDate').value = registration.purchaseDate.split('T')[0];
             document.getElementById('editStatus').value = registration.status;
         }
@@ -1151,101 +1248,4 @@
                     body: JSON.stringify({ warrantyNumber, productId, productName })
                 });
 
-                const data = await response.json();
-
-                if (response.ok) {
-                    showSuccess('addWarrantySuccess', 'Warranty number added successfully!');
-                    document.getElementById('addWarrantyForm').reset();
-                    loadWarrantyNumbers();
-                    loadDashboard(); // Refresh stats
-                } else {
-                    showError('addWarrantyError', data.error);
-                }
-            } catch (error) {
-                showError('addWarrantyError', 'Failed to add warranty number');
-            }
-        });
-
-        // Product name mapping
-        function setupProductNameMapping() {
-            const productSelect = document.getElementById('productId');
-            const productNameInput = document.getElementById('productName');
-            
-            const productNames = {
-                'th11': 'LDAS TH11 Headset',
-                'g7': 'LDAS G7 Headset',
-                'g10': 'LDAS G10 Headset'
-            };
-
-            productSelect.addEventListener('change', function() {
-                productNameInput.value = productNames[this.value] || '';
-            });
-        }
-
-        // Export registrations
-        async function exportRegistrations() {
-            try {
-                const response = await fetch(`${API_BASE}/admin/export/registrations`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'warranty_registrations.csv';
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                } else {
-                    alert('Export failed');
-                }
-            } catch (error) {
-                alert('Export failed: ' + error.message);
-            }
-        }
-
-        // Debounced search
-        function debounceLoadRegistrations() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                loadRegistrations(1);
-            }, 500);
-        }
-
-        // Utility functions
-        function showError(elementId, message) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.textContent = message;
-                element.classList.remove('hidden');
-            }
-        }
-
-        function showSuccess(elementId, message) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.textContent = message;
-                element.classList.remove('hidden');
-            }
-        }
-
-        function hideAlert(elementId) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.classList.add('hidden');
-            }
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            const modals = document.getElementsByClassName('modal');
-            for (let modal of modals) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            }
-        }
-    </script>
-</body>
-</html>
+                const data = await response.
