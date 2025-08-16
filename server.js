@@ -16,6 +16,8 @@ const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/warranty_s
 
 // Add Shopify Service Import
 const ShopifyService = require('./shopifyService');
+// Add Email Service Import
+const EmailService = require('./emailService');
 
 // Middleware
 app.use(cors());
@@ -46,7 +48,7 @@ const WarrantyNumberSchema = new mongoose.Schema({
   registrationId: { type: mongoose.Schema.Types.ObjectId, ref: 'WarrantyRegistration' }
 });
 
-// Enhanced WarrantyRegistration Schema with Claims Support AND Shopify Integration
+// Enhanced WarrantyRegistration Schema with Claims Support, Shopify Integration AND Email Fields
 const WarrantyRegistrationSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
@@ -73,6 +75,10 @@ const WarrantyRegistrationSchema = new mongoose.Schema({
   shopifyTags: [{ type: String }],
   shopifyIntegrationStatus: { type: String, enum: ['pending', 'success', 'failed', 'error'], default: 'pending' },
   isRepeatCustomer: { type: Boolean, default: false },
+  // Email confirmation fields
+  emailSent: { type: Boolean, default: false },
+  emailSentAt: { type: Date },
+  emailStatus: { type: String, enum: ['pending', 'sent', 'failed'], default: 'pending' },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -267,10 +273,10 @@ app.get('/api/admin/warranty-numbers', authenticateAdmin, async (req, res) => {
   }
 });
 
-// ENHANCED WARRANTY REGISTRATION WITH SHOPIFY INTEGRATION
+// ENHANCED WARRANTY REGISTRATION WITH SHOPIFY AND EMAIL INTEGRATION
 app.post('/api/register', async (req, res) => {
   try {
-    console.log('🔄 Processing warranty registration with Shopify integration...');
+    console.log('🔄 Processing warranty registration with integrations...');
     
     const {
       firstName,
@@ -332,7 +338,10 @@ app.post('/api/register', async (req, res) => {
       // Shopify integration fields
       shopifyCustomerId: null,
       shopifyTags: [],
-      shopifyIntegrationStatus: 'pending'
+      shopifyIntegrationStatus: 'pending',
+      // Email fields
+      emailSent: false,
+      emailStatus: 'pending'
     };
 
     // Save to database first
@@ -362,14 +371,49 @@ app.post('/api/register', async (req, res) => {
         console.log('⚠️ Shopify integration failed but warranty still registered');
       }
       
-      await registration.save();
-      
     } catch (shopifyError) {
       console.error('⚠️ Shopify integration error:', shopifyError.message);
       registration.shopifyIntegrationStatus = 'error';
-      await registration.save();
-      // Continue - don't fail the entire registration if Shopify fails
     }
+
+    // NEW: Send warranty confirmation email via Omnisend
+    const emailService = new EmailService();
+    let emailResult = { success: false, message: 'Email not attempted' };
+
+    try {
+      console.log('📧 Sending warranty confirmation email...');
+      
+      emailResult = await emailService.sendWarrantyConfirmation(
+        { firstName, lastName, email, phone, address },
+        {
+          product,
+          warrantyNumber,
+          purchaseDate: new Date(purchaseDate),
+          warrantyEndDate: warrantyData.warrantyEndDate,
+          source
+        }
+      );
+      
+      if (emailResult.success) {
+        console.log('✅ Warranty confirmation email sent successfully');
+        registration.emailSent = true;
+        registration.emailSentAt = new Date();
+        registration.emailStatus = 'sent';
+      } else {
+        console.log('⚠️ Email sending failed but warranty still registered');
+        registration.emailSent = false;
+        registration.emailStatus = 'failed';
+      }
+      
+    } catch (emailError) {
+      console.error('⚠️ Email sending error:', emailError.message);
+      registration.emailSent = false;
+      registration.emailStatus = 'failed';
+      emailResult = { success: false, message: 'Email service error', error: emailError.message };
+    }
+
+    // Save all updates to registration
+    await registration.save();
 
     await WarrantyNumber.findByIdAndUpdate(validWarrantyNumber._id, {
       isUsed: true,
@@ -387,6 +431,11 @@ app.post('/api/register', async (req, res) => {
         status: registration.shopifyIntegrationStatus,
         customerAction: shopifyResult.action,
         customerId: registration.shopifyCustomerId
+      },
+      emailConfirmation: {
+        sent: emailResult.success,
+        message: emailResult.message,
+        messageId: emailResult.messageId || null
       }
     });
   } catch (error) {
@@ -655,7 +704,7 @@ app.get('/api/admin/search/customers', authenticateAdmin, async (req, res) => {
     const results = await WarrantyRegistration.find(filter)
       .limit(parseInt(limit))
       .sort({ createdAt: -1 })
-      .select('fullName email product warrantyNumber orderId purchaseDate status source createdAt warrantyEndDate claimDate claimType shopifyCustomerId shopifyIntegrationStatus');
+      .select('fullName email product warrantyNumber orderId purchaseDate status source createdAt warrantyEndDate claimDate claimType shopifyCustomerId shopifyIntegrationStatus emailSent emailStatus');
 
     res.json({
       results,
@@ -690,6 +739,8 @@ app.get('/api/admin/export/registrations', authenticateAdmin, async (req, res) =
         { id: 'claimNotes', title: 'Claim Notes' },
         { id: 'shopifyCustomerId', title: 'Shopify Customer ID' },
         { id: 'shopifyIntegrationStatus', title: 'Shopify Status' },
+        { id: 'emailSent', title: 'Email Sent' },
+        { id: 'emailStatus', title: 'Email Status' },
         { id: 'createdAt', title: 'Registration Date' }
       ]
     });
@@ -715,7 +766,7 @@ app.get('/api/admin/export/registrations', authenticateAdmin, async (req, res) =
   }
 });
 
-// Enhanced dashboard stats with claims data
+// Enhanced dashboard stats with claims and email data
 app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
   try {
     const totalWarrantyNumbers = await WarrantyNumber.countDocuments();
@@ -730,6 +781,10 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
     // Shopify integration stats
     const shopifySuccessful = await WarrantyRegistration.countDocuments({ shopifyIntegrationStatus: 'success' });
     const shopifyFailed = await WarrantyRegistration.countDocuments({ shopifyIntegrationStatus: 'failed' });
+
+    // Email stats
+    const emailsSent = await WarrantyRegistration.countDocuments({ emailSent: true });
+    const emailsFailed = await WarrantyRegistration.countDocuments({ emailStatus: 'failed' });
 
     const productStats = await WarrantyRegistration.aggregate([
       { $group: { _id: '$productId', count: { $sum: 1 }, product: { $first: '$product' } } },
@@ -764,6 +819,11 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
         successful: shopifySuccessful,
         failed: shopifyFailed,
         successRate: totalRegistrations > 0 ? ((shopifySuccessful / totalRegistrations) * 100).toFixed(1) : 0
+      },
+      emailConfirmations: {
+        sent: emailsSent,
+        failed: emailsFailed,
+        successRate: totalRegistrations > 0 ? ((emailsSent / totalRegistrations) * 100).toFixed(1) : 0
       },
       productStats,
       claimStats
@@ -844,12 +904,64 @@ app.post('/api/admin/shopify/sync/:registrationId', authenticateAdmin, async (re
   }
 });
 
+// EMAIL ADMIN ROUTES
+// Test email service connection
+app.get('/api/admin/email/test', authenticateAdmin, async (req, res) => {
+  try {
+    const emailService = new EmailService();
+    const result = await emailService.testConnection();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Resend email for a specific registration
+app.post('/api/admin/email/resend/:registrationId', authenticateAdmin, async (req, res) => {
+  try {
+    const registration = await WarrantyRegistration.findById(req.params.registrationId);
+    if (!registration) {
+      return res.status(404).json({ success: false, message: 'Registration not found' });
+    }
+
+    const emailService = new EmailService();
+    const emailResult = await emailService.sendWarrantyConfirmation(
+      {
+        firstName: registration.firstName,
+        lastName: registration.lastName,
+        email: registration.email,
+        phone: registration.phone,
+        address: registration.address
+      },
+      {
+        product: registration.product,
+        warrantyNumber: registration.warrantyNumber,
+        purchaseDate: registration.purchaseDate,
+        warrantyEndDate: registration.warrantyEndDate,
+        source: registration.source
+      }
+    );
+
+    // Update registration
+    if (emailResult.success) {
+      registration.emailSent = true;
+      registration.emailSentAt = new Date();
+      registration.emailStatus = 'sent';
+      await registration.save();
+    }
+
+    res.json({ success: true, result: emailResult });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
 // Health check endpoint
 app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
-    version: '2.0.0'
+    version: '2.1.0'
   });
 });
 
@@ -867,12 +979,27 @@ app.get('/api/test-shopify', async (req, res) => {
   }
 });
 
+// Email Test Route
+app.get('/api/test-email', async (req, res) => {
+  try {
+    const emailService = new EmailService();
+    const result = await emailService.testConnection();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
+
 // Start server
 app.listen(PORT, async () => {
   console.log(`🚀 LDAS Warranty System running on port ${PORT}`);
   console.log(`📊 Dashboard: http://localhost:${PORT}`);
   console.log(`🔍 API Health: http://localhost:${PORT}/api/health`);
   console.log(`🛍️ Shopify Test: http://localhost:${PORT}/api/test-shopify`);
+  console.log(`📧 Email Test: http://localhost:${PORT}/api/test-email`);
   await initializeAdmin();
 });
 
