@@ -853,13 +853,11 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// Add Shopify Test Route
-const ShopifyTester = require('./shopifyTest');
-
+// Shopify Test Route (Built-in)
 app.get('/api/test-shopify', async (req, res) => {
   try {
-    const tester = new ShopifyTester();
-    const result = await tester.testConnection();
+    const shopifyService = new ShopifyService();
+    const result = await shopifyService.testConnection();
     res.json(result);
   } catch (error) {
     res.status(500).json({ 
