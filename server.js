@@ -14,6 +14,9 @@ const PORT = process.env.PORT || 3000;
 const JWT_SECRET = process.env.JWT_SECRET || 'your-secret-key';
 const MONGO_URI = process.env.MONGO_URI || 'mongodb://localhost:27017/warranty_system';
 
+// Add Shopify Service Import
+const ShopifyService = require('./shopifyService');
+
 // Middleware
 app.use(cors());
 app.use(express.json());
@@ -43,12 +46,14 @@ const WarrantyNumberSchema = new mongoose.Schema({
   registrationId: { type: mongoose.Schema.Types.ObjectId, ref: 'WarrantyRegistration' }
 });
 
-// Enhanced WarrantyRegistration Schema with Claims Support
+// Enhanced WarrantyRegistration Schema with Claims Support AND Shopify Integration
 const WarrantyRegistrationSchema = new mongoose.Schema({
   firstName: { type: String, required: true },
   lastName: { type: String, required: true },
   fullName: { type: String, required: true },
   email: { type: String, required: true },
+  phone: { type: String },
+  address: { type: String },
   product: { type: String, required: true },
   productId: { type: String, required: true },
   source: { type: String, required: true },
@@ -63,6 +68,11 @@ const WarrantyRegistrationSchema = new mongoose.Schema({
   claimType: { type: String, enum: ['replacement', 'repair', 'refund', 'technical'] },
   claimNotes: { type: String },
   claimProcessedBy: { type: String },
+  // Shopify integration fields
+  shopifyCustomerId: { type: String },
+  shopifyTags: [{ type: String }],
+  shopifyIntegrationStatus: { type: String, enum: ['pending', 'success', 'failed', 'error'], default: 'pending' },
+  isRepeatCustomer: { type: Boolean, default: false },
   createdAt: { type: Date, default: Date.now }
 });
 
@@ -94,6 +104,17 @@ const authenticateAdmin = async (req, res, next) => {
     res.status(401).json({ error: 'Invalid token' });
   }
 };
+
+// Helper function to get product code
+function getProductCode(productName) {
+  const productMap = {
+    'LDAS TH11 Headset': 'th11',
+    'LDAS G7 Headset': 'g7',
+    'LDAS G10 Headset': 'g10'
+  };
+  
+  return productMap[productName] || 'unknown';
+}
 
 // Initialize default admin
 const initializeAdmin = async () => {
@@ -246,14 +267,18 @@ app.get('/api/admin/warranty-numbers', authenticateAdmin, async (req, res) => {
   }
 });
 
-// Warranty Registration (Public endpoint)
+// ENHANCED WARRANTY REGISTRATION WITH SHOPIFY INTEGRATION
 app.post('/api/register', async (req, res) => {
   try {
+    console.log('🔄 Processing warranty registration with Shopify integration...');
+    
     const {
       firstName,
       lastName,
       fullName,
       email,
+      phone,
+      address,
       product,
       productId,
       source,
@@ -261,6 +286,13 @@ app.post('/api/register', async (req, res) => {
       warrantyNumber,
       purchaseDate
     } = req.body;
+
+    // Validation
+    if (!firstName || !lastName || !email || !warrantyNumber || !product || !source || !purchaseDate) {
+      return res.status(400).json({
+        error: 'Missing required fields'
+      });
+    }
 
     const validWarrantyNumber = await WarrantyNumber.findOne({
       warrantyNumber,
@@ -274,22 +306,70 @@ app.post('/api/register', async (req, res) => {
       });
     }
 
+    // Check if customer is repeat customer
+    const existingRegistrations = await WarrantyRegistration.find({ email });
+    const isRepeatCustomer = existingRegistrations.length > 0;
+
     const warrantyEndDate = new Date(purchaseDate);
     warrantyEndDate.setFullYear(warrantyEndDate.getFullYear() + 1);
 
-    const registration = await WarrantyRegistration.create({
+    // Create warranty registration data
+    const warrantyData = {
       firstName,
       lastName,
-      fullName,
+      fullName: fullName || `${firstName} ${lastName}`,
       email,
+      phone,
+      address,
       product,
-      productId,
+      productId: productId || getProductCode(product),
       source,
       orderId,
       warrantyNumber,
       purchaseDate: new Date(purchaseDate),
-      warrantyEndDate
-    });
+      warrantyEndDate,
+      isRepeatCustomer,
+      // Shopify integration fields
+      shopifyCustomerId: null,
+      shopifyTags: [],
+      shopifyIntegrationStatus: 'pending'
+    };
+
+    // Save to database first
+    const registration = await WarrantyRegistration.create(warrantyData);
+    console.log('✅ Warranty saved to database');
+
+    // Try to create/update customer in Shopify
+    const shopifyService = new ShopifyService();
+    let shopifyResult = { success: false, action: 'skipped' };
+    
+    try {
+      console.log('🛍️ Starting Shopify customer integration...');
+      
+      shopifyResult = await shopifyService.createOrUpdateCustomer(
+        { firstName, lastName, email, phone, address },
+        warrantyData
+      );
+      
+      // Update registration with Shopify results
+      if (shopifyResult.success) {
+        registration.shopifyCustomerId = shopifyResult.customer.id.toString();
+        registration.shopifyTags = shopifyResult.customer.tags ? shopifyResult.customer.tags.split(', ') : [];
+        registration.shopifyIntegrationStatus = 'success';
+        console.log(`✅ Customer ${shopifyResult.action} in Shopify successfully`);
+      } else {
+        registration.shopifyIntegrationStatus = 'failed';
+        console.log('⚠️ Shopify integration failed but warranty still registered');
+      }
+      
+      await registration.save();
+      
+    } catch (shopifyError) {
+      console.error('⚠️ Shopify integration error:', shopifyError.message);
+      registration.shopifyIntegrationStatus = 'error';
+      await registration.save();
+      // Continue - don't fail the entire registration if Shopify fails
+    }
 
     await WarrantyNumber.findByIdAndUpdate(validWarrantyNumber._id, {
       isUsed: true,
@@ -297,12 +377,20 @@ app.post('/api/register', async (req, res) => {
       registrationId: registration._id
     });
 
+    console.log('✅ Warranty registration completed successfully');
+
     res.json({ 
       message: 'Warranty registered successfully',
       registrationId: registration._id,
-      warrantyEndDate
+      warrantyEndDate,
+      shopifyIntegration: {
+        status: registration.shopifyIntegrationStatus,
+        customerAction: shopifyResult.action,
+        customerId: registration.shopifyCustomerId
+      }
     });
   } catch (error) {
+    console.error('❌ Registration error:', error);
     res.status(500).json({ error: error.message });
   }
 });
@@ -567,7 +655,7 @@ app.get('/api/admin/search/customers', authenticateAdmin, async (req, res) => {
     const results = await WarrantyRegistration.find(filter)
       .limit(parseInt(limit))
       .sort({ createdAt: -1 })
-      .select('fullName email product warrantyNumber orderId purchaseDate status source createdAt warrantyEndDate claimDate claimType');
+      .select('fullName email product warrantyNumber orderId purchaseDate status source createdAt warrantyEndDate claimDate claimType shopifyCustomerId shopifyIntegrationStatus');
 
     res.json({
       results,
@@ -600,6 +688,8 @@ app.get('/api/admin/export/registrations', authenticateAdmin, async (req, res) =
         { id: 'claimDate', title: 'Claim Date' },
         { id: 'claimType', title: 'Claim Type' },
         { id: 'claimNotes', title: 'Claim Notes' },
+        { id: 'shopifyCustomerId', title: 'Shopify Customer ID' },
+        { id: 'shopifyIntegrationStatus', title: 'Shopify Status' },
         { id: 'createdAt', title: 'Registration Date' }
       ]
     });
@@ -637,6 +727,10 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
     });
     const claimedWarranties = await WarrantyRegistration.countDocuments({ status: 'claimed' });
 
+    // Shopify integration stats
+    const shopifySuccessful = await WarrantyRegistration.countDocuments({ shopifyIntegrationStatus: 'success' });
+    const shopifyFailed = await WarrantyRegistration.countDocuments({ shopifyIntegrationStatus: 'failed' });
+
     const productStats = await WarrantyRegistration.aggregate([
       { $group: { _id: '$productId', count: { $sum: 1 }, product: { $first: '$product' } } },
       { $sort: { count: -1 } }
@@ -666,11 +760,87 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
       claimedWarranties,
       recentRegistrations,
       recentClaims,
+      shopifyIntegration: {
+        successful: shopifySuccessful,
+        failed: shopifyFailed,
+        successRate: totalRegistrations > 0 ? ((shopifySuccessful / totalRegistrations) * 100).toFixed(1) : 0
+      },
       productStats,
       claimStats
     });
   } catch (error) {
     res.status(500).json({ error: error.message });
+  }
+});
+
+// SHOPIFY ADMIN ROUTES
+app.get('/api/admin/shopify/test', authenticateAdmin, async (req, res) => {
+  try {
+    const shopifyService = new ShopifyService();
+    const result = await shopifyService.testConnection();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Get customer info from Shopify
+app.get('/api/admin/shopify/customer/:email', authenticateAdmin, async (req, res) => {
+  try {
+    const shopifyService = new ShopifyService();
+    const customer = await shopifyService.findCustomerByEmail(req.params.email);
+    
+    if (customer) {
+      res.json({ 
+        success: true, 
+        customer: {
+          id: customer.id,
+          name: `${customer.first_name} ${customer.last_name}`,
+          email: customer.email,
+          tags: customer.tags,
+          totalOrders: customer.orders_count,
+          totalSpent: customer.total_spent
+        }
+      });
+    } else {
+      res.json({ success: false, message: 'Customer not found in Shopify' });
+    }
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+});
+
+// Manually sync customer to Shopify
+app.post('/api/admin/shopify/sync/:registrationId', authenticateAdmin, async (req, res) => {
+  try {
+    const registration = await WarrantyRegistration.findById(req.params.registrationId);
+    if (!registration) {
+      return res.status(404).json({ success: false, message: 'Registration not found' });
+    }
+
+    const shopifyService = new ShopifyService();
+    const shopifyResult = await shopifyService.createOrUpdateCustomer(
+      {
+        firstName: registration.firstName,
+        lastName: registration.lastName,
+        email: registration.email,
+        phone: registration.phone,
+        address: registration.address
+      },
+      registration
+    );
+
+    // Update registration
+    if (shopifyResult.success) {
+      registration.shopifyCustomerId = shopifyResult.customer.id.toString();
+      registration.shopifyTags = shopifyResult.customer.tags.split(', ');
+      registration.shopifyIntegrationStatus = 'success';
+      await registration.save();
+    }
+
+    res.json({ success: true, result: shopifyResult });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
   }
 });
 
@@ -682,10 +852,10 @@ app.get('/api/health', (req, res) => {
     version: '2.0.0'
   });
 });
-// Add this line at the top with your other requires
+
+// Add Shopify Test Route
 const ShopifyTester = require('./shopifyTest');
 
-// Add this route before app.listen()
 app.get('/api/test-shopify', async (req, res) => {
   try {
     const tester = new ShopifyTester();
@@ -698,11 +868,13 @@ app.get('/api/test-shopify', async (req, res) => {
     });
   }
 });
+
 // Start server
 app.listen(PORT, async () => {
   console.log(`🚀 LDAS Warranty System running on port ${PORT}`);
   console.log(`📊 Dashboard: http://localhost:${PORT}`);
   console.log(`🔍 API Health: http://localhost:${PORT}/api/health`);
+  console.log(`🛍️ Shopify Test: http://localhost:${PORT}/api/test-shopify`);
   await initializeAdmin();
 });
 
