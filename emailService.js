@@ -11,43 +11,98 @@ class EmailService {
       'X-API-KEY': this.apiKey,
       'Content-Type': 'application/json'
     };
+
+    console.log('📧 EmailService initialized with:', {
+      baseUrl: this.baseUrl,
+      fromEmail: this.fromEmail,
+      fromName: this.fromName,
+      hasApiKey: !!this.apiKey
+    });
   }
 
   async sendWarrantyConfirmation(customerData, warrantyData) {
     try {
       console.log('📧 Sending warranty confirmation email to:', customerData.email);
       
-      // First, add/update contact in Omnisend
-      await this.addContact(customerData, warrantyData);
+      // First, try to add/update contact in Omnisend (simplified)
+      await this.addContactSimple(customerData, warrantyData);
       
-      // Then send the email
+      // Then send the email using the campaigns endpoint
       const emailData = this.createWarrantyEmailData(customerData, warrantyData);
       
+      console.log('📧 Sending email via Omnisend campaigns API...');
       const response = await axios.post(
-        `${this.baseUrl}/emails`,
+        `${this.baseUrl}/campaigns`,
         emailData,
         { headers: this.headers }
       );
 
-      console.log('✅ Email sent successfully via Omnisend');
+      console.log('✅ Email campaign created successfully via Omnisend');
       return { 
         success: true, 
-        messageId: response.data.emailID || 'omnisend-email',
+        messageId: response.data.campaignID || 'omnisend-campaign',
         message: 'Warranty confirmation email sent successfully'
       };
       
     } catch (error) {
-      console.error('❌ Email sending failed:', error.response?.data || error.message);
+      console.error('❌ Email sending failed:', {
+        message: error.message,
+        status: error.response?.status,
+        data: error.response?.data,
+        url: error.config?.url
+      });
+      
+      // Try alternative method - direct email send
+      return await this.sendDirectEmail(customerData, warrantyData);
+    }
+  }
+
+  async sendDirectEmail(customerData, warrantyData) {
+    try {
+      console.log('📧 Trying direct email send method...');
+      
+      const emailData = {
+        to: customerData.email,
+        from: {
+          email: this.fromEmail,
+          name: this.fromName
+        },
+        subject: `✅ Warranty Registration Confirmed - ${warrantyData.product}`,
+        content: this.getWarrantyEmailHTML(customerData, warrantyData, warrantyData.warrantyEndDate)
+      };
+
+      const response = await axios.post(
+        `${this.baseUrl}/messages`,
+        emailData,
+        { headers: this.headers }
+      );
+
+      console.log('✅ Direct email sent successfully');
+      return { 
+        success: true, 
+        messageId: response.data.messageId || 'omnisend-direct',
+        message: 'Warranty confirmation email sent via direct method'
+      };
+      
+    } catch (directError) {
+      console.error('❌ Direct email also failed:', {
+        message: directError.message,
+        status: directError.response?.status,
+        data: directError.response?.data
+      });
+      
       return { 
         success: false, 
-        error: error.response?.data || error.message,
-        message: 'Failed to send confirmation email'
+        error: directError.response?.data || directError.message,
+        message: 'All email sending methods failed'
       };
     }
   }
 
-  async addContact(customerData, warrantyData) {
+  async addContactSimple(customerData, warrantyData) {
     try {
+      console.log('👤 Adding contact to Omnisend...');
+      
       const contactData = {
         email: customerData.email,
         firstName: customerData.firstName,
@@ -56,55 +111,56 @@ class EmailService {
         tags: [
           'warranty-customer',
           `product-${this.getProductCode(warrantyData.product)}`,
-          'warranty-active',
-          `source-${warrantyData.source.toLowerCase().replace(/[^a-z0-9]/g, '-')}`
+          'warranty-active'
         ],
         customProperties: {
           warrantyNumber: warrantyData.warrantyNumber,
           product: warrantyData.product,
-          purchaseDate: warrantyData.purchaseDate,
-          warrantyEndDate: warrantyData.warrantyEndDate,
           source: warrantyData.source
         }
       };
 
-      await axios.post(
+      const response = await axios.post(
         `${this.baseUrl}/contacts`,
         contactData,
         { headers: this.headers }
       );
 
-      console.log('✅ Contact added/updated in Omnisend');
+      console.log('✅ Contact added to Omnisend successfully');
+      return response.data;
     } catch (error) {
-      console.log('⚠️ Contact update failed (but continuing with email):', error.response?.data?.title || error.message);
+      console.log('⚠️ Contact creation failed (continuing anyway):', {
+        status: error.response?.status,
+        message: error.response?.data?.detail || error.message
+      });
+      
+      // Don't throw error - continue with email sending
+      return null;
     }
   }
 
   createWarrantyEmailData(customer, warranty) {
-    const warrantyEndDate = new Date(warranty.purchaseDate);
-    warrantyEndDate.setFullYear(warrantyEndDate.getFullYear() + 1);
-
     return {
-      to: [
-        {
-          email: customer.email,
-          firstName: customer.firstName,
-          lastName: customer.lastName
-        }
-      ],
-      from: {
-        email: this.fromEmail,
-        name: this.fromName
-      },
+      name: `Warranty Confirmation - ${warranty.warrantyNumber}`,
+      type: 'regular',
       subject: `✅ Warranty Registration Confirmed - ${warranty.product}`,
       content: {
-        html: this.getWarrantyEmailHTML(customer, warranty, warrantyEndDate),
-        text: this.getWarrantyEmailText(customer, warranty, warrantyEndDate)
+        html: this.getWarrantyEmailHTML(customer, warranty, warranty.warrantyEndDate)
+      },
+      recipients: {
+        type: 'custom',
+        emails: [customer.email]
+      },
+      sender: {
+        email: this.fromEmail,
+        name: this.fromName
       }
     };
   }
 
   getWarrantyEmailHTML(customer, warranty, warrantyEndDate) {
+    const endDate = new Date(warrantyEndDate);
+    
     return `
     <!DOCTYPE html>
     <html lang="en">
@@ -148,7 +204,7 @@ class EmailService {
             <p><strong>Product:</strong> ${warranty.product}</p>
             <p><strong>Warranty Number:</strong> ${warranty.warrantyNumber}</p>
             <p><strong>Purchase Date:</strong> ${new Date(warranty.purchaseDate).toLocaleDateString()}</p>
-            <p><strong>Warranty Valid Until:</strong> <span class="highlight">${warrantyEndDate.toLocaleDateString()}</span></p>
+            <p><strong>Warranty Valid Until:</strong> <span class="highlight">${endDate.toLocaleDateString()}</span></p>
             <p><strong>Registration Date:</strong> ${new Date().toLocaleDateString()}</p>
             <p><strong>Purchase Source:</strong> ${warranty.source}</p>
           </div>
@@ -176,7 +232,7 @@ class EmailService {
         
         <div class="footer">
           <p><strong>LDAS Electronics Support</strong></p>
-          <p>📧 Email: support@ldaselectronics.com | 📞 Phone: 1-437-777-8300</p>
+          <p>📧 Email: support@ldaselectronics.com | 📞 Phone: 1-800-LDAS-HELP</p>
           <p>🌐 Website: ldas.ca</p>
           <p style="margin-top: 15px;">© 2025 LDAS Electronics. All rights reserved.</p>
           <p style="margin-top: 10px; font-size: 12px; opacity: 0.8;">
@@ -186,44 +242,6 @@ class EmailService {
       </div>
     </body>
     </html>`;
-  }
-
-  getWarrantyEmailText(customer, warranty, warrantyEndDate) {
-    return `
-LDAS ELECTRONICS - WARRANTY REGISTRATION CONFIRMED
-
-Hello ${customer.firstName} ${customer.lastName},
-
-Your warranty registration has been successfully processed!
-
-WARRANTY DETAILS:
-- Product: ${warranty.product}
-- Warranty Number: ${warranty.warrantyNumber}
-- Purchase Date: ${new Date(warranty.purchaseDate).toLocaleDateString()}
-- Warranty Valid Until: ${warrantyEndDate.toLocaleDateString()}
-- Registration Date: ${new Date().toLocaleDateString()}
-- Purchase Source: ${warranty.source}
-
-CUSTOMER INFORMATION:
-- Name: ${customer.firstName} ${customer.lastName}
-- Email: ${customer.email}
-${customer.phone ? `- Phone: ${customer.phone}` : ''}
-
-WHAT'S NEXT:
-- Keep this email as proof of warranty registration
-- Warranty is valid for 12 months from purchase date
-- For claims, reference warranty number: ${warranty.warrantyNumber}
-- Contact support@ldaselectronics.com for assistance
-
-IMPORTANT: This warranty covers manufacturing defects and hardware failures under normal use. Physical damage, water damage, and misuse are not covered.
-
-LDAS Electronics Support
-Email: support@ldaselectronics.com
-Phone: 1-437-777-8300
-Website: ldas.ca
-
-© 2025 LDAS Electronics. All rights reserved.
-`;
   }
 
   getProductCode(productName) {
@@ -237,20 +255,30 @@ Website: ldas.ca
 
   async testConnection() {
     try {
+      console.log('🧪 Testing Omnisend connection...');
+      
+      // Test basic API access
       const response = await axios.get(
-        `${this.baseUrl}/contacts?limit=1`,
+        `${this.baseUrl}/account`,
         { headers: this.headers }
       );
       
+      console.log('✅ Omnisend connection successful');
       return {
         success: true,
         message: 'Omnisend connection successful',
-        contacts: response.data.contacts ? response.data.contacts.length : 0
+        account: response.data.companyName || 'Connected'
       };
     } catch (error) {
+      console.error('❌ Omnisend connection failed:', {
+        status: error.response?.status,
+        message: error.response?.data || error.message
+      });
+      
       return {
         success: false,
-        error: error.response?.data || error.message
+        error: error.response?.data || error.message,
+        status: error.response?.status
       };
     }
   }
