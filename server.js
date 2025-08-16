@@ -82,10 +82,111 @@ const WarrantyRegistrationSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now }
 });
 
+// NEW: Claims Schema
+const ClaimSchema = new mongoose.Schema({
+  claimNumber: { type: String, required: true, unique: true },
+  warrantyId: { type: mongoose.Schema.Types.ObjectId, ref: 'WarrantyRegistration', required: true },
+  warrantyNumber: { type: String, required: true },
+  
+  // Customer Information (copied from warranty for convenience)
+  customerName: { type: String, required: true },
+  customerEmail: { type: String, required: true },
+  contactPhone: { type: String, required: true },
+  shippingAddress: { type: String, required: true },
+  contactMethod: { type: String, enum: ['email', 'phone', 'sms'], default: 'email' },
+  
+  // Issue Details
+  issueType: { 
+    type: String, 
+    required: true,
+    enum: ['not-turning-on', 'audio-quality', 'physical-damage', 'manufacturing-defect', 
+           'connectivity', 'battery', 'charging', 'buttons-controls', 'other']
+  },
+  issueDescription: { type: String, required: true },
+  issueStartDate: { type: Date },
+  usageFrequency: { type: String, enum: ['daily', 'weekly', 'monthly', 'rarely'] },
+  troubleshootingSteps: [{ type: String }],
+  additionalNotes: { type: String },
+  
+  // Resolution
+  preferredResolution: { 
+    type: String, 
+    required: true,
+    enum: ['replacement', 'repair', 'refund', 'credit']
+  },
+  
+  // Claim Status
+  status: { 
+    type: String, 
+    enum: ['submitted', 'under-review', 'approved', 'denied', 'completed', 'cancelled'],
+    default: 'submitted'
+  },
+  priority: { type: String, enum: ['low', 'standard', 'high', 'urgent'], default: 'standard' },
+  
+  // Admin Processing
+  assignedTo: { type: String }, // Admin username
+  adminNotes: [{ 
+    note: String, 
+    addedBy: String, 
+    addedAt: { type: Date, default: Date.now }
+  }],
+  resolutionNotes: { type: String },
+  denialReason: { type: String },
+  
+  // Processing Dates
+  reviewStartedAt: { type: Date },
+  resolvedAt: { type: Date },
+  
+  // File Attachments (simplified for now)
+  attachments: [{
+    type: { type: String, enum: ['photo', 'video', 'receipt', 'other'] },
+    filename: String,
+    originalName: String,
+    fileSize: Number,
+    uploadedAt: { type: Date, default: Date.now }
+  }],
+  
+  // Integration Status
+  emailsSent: [{ 
+    type: String, 
+    sentAt: { type: Date, default: Date.now },
+    status: String 
+  }],
+  shopifyUpdated: { type: Boolean, default: false },
+  
+  // Timestamps
+  submittedAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now }
+});
+
+// Auto-update updatedAt on save
+ClaimSchema.pre('save', function(next) {
+  this.updatedAt = new Date();
+  next();
+});
+
+// Generate claim number automatically
+ClaimSchema.pre('save', async function(next) {
+  if (this.isNew && !this.claimNumber) {
+    try {
+      const count = await this.constructor.countDocuments();
+      const year = new Date().getFullYear();
+      const productCode = this.warrantyNumber.includes('TH11') ? 'TH11' : 
+                         this.warrantyNumber.includes('G7') ? 'G7' : 'G10';
+      this.claimNumber = `CLAIM-${productCode}-${year}-${(count + 1).toString().padStart(4, '0')}`;
+    } catch (error) {
+      console.error('Error generating claim number:', error);
+      this.claimNumber = `CLAIM-${Date.now()}`;
+    }
+  }
+  next();
+});
+
 // Models
 const Admin = mongoose.model('Admin', AdminSchema);
 const WarrantyNumber = mongoose.model('WarrantyNumber', WarrantyNumberSchema);
 const WarrantyRegistration = mongoose.model('WarrantyRegistration', WarrantyRegistrationSchema);
+const Claim = mongoose.model('Claim', ClaimSchema);
 
 // Multer configuration for file uploads
 const upload = multer({ dest: 'uploads/' });
@@ -120,6 +221,80 @@ function getProductCode(productName) {
   };
   
   return productMap[productName] || 'unknown';
+}
+
+// Helper function to determine claim priority
+function determinePriority(issueType, warranty) {
+  // High priority for recent purchases with serious issues
+  const daysSincePurchase = (new Date() - new Date(warranty.purchaseDate)) / (1000 * 60 * 60 * 24);
+  
+  if (daysSincePurchase <= 30 && ['not-turning-on', 'manufacturing-defect'].includes(issueType)) {
+    return 'high';
+  }
+  
+  if (['not-turning-on', 'manufacturing-defect'].includes(issueType)) {
+    return 'standard';
+  }
+  
+  return 'standard';
+}
+
+// Helper function for expected resolution time
+function getExpectedResolutionTime(priority) {
+  const times = {
+    urgent: '1 business day',
+    high: '2 business days', 
+    standard: '3-5 business days',
+    low: '5-7 business days'
+  };
+  return times[priority] || '3-5 business days';
+}
+
+// Send claim confirmation email
+async function sendClaimConfirmationEmail(claim, warranty) {
+  try {
+    const emailService = new EmailService();
+    
+    // Add contact to Omnisend with claim tags
+    await emailService.addContactV5(
+      {
+        firstName: warranty.firstName,
+        lastName: warranty.lastName,
+        email: claim.customerEmail,
+        phone: claim.contactPhone
+      },
+      {
+        product: warranty.product,
+        warrantyNumber: warranty.warrantyNumber,
+        purchaseDate: warranty.purchaseDate,
+        warrantyEndDate: warranty.warrantyEndDate,
+        source: warranty.source
+      }
+    );
+    
+    // Trigger claim event
+    await emailService.triggerWarrantyEvent(
+      {
+        firstName: warranty.firstName,
+        lastName: warranty.lastName,
+        email: claim.customerEmail
+      },
+      {
+        product: warranty.product,
+        warrantyNumber: warranty.warrantyNumber,
+        purchaseDate: warranty.purchaseDate,
+        warrantyEndDate: warranty.warrantyEndDate,
+        source: warranty.source
+      }
+    );
+    
+    console.log('✅ Claim confirmation email process completed');
+    return { success: true, message: 'Claim confirmation email sent successfully' };
+    
+  } catch (error) {
+    console.error('❌ Claim email failed:', error);
+    return { success: false, error: error.message };
+  }
 }
 
 // Initialize default admin
@@ -163,6 +338,392 @@ app.post('/api/admin/login', async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// NEW CLAIMS API ENDPOINTS
+
+// Warranty Lookup for Claims
+app.get('/api/warranty/lookup', async (req, res) => {
+  try {
+    console.log('🔍 Warranty lookup request:', req.query);
+    
+    const { email, warrantyNumber, orderId, serialNumber } = req.query;
+    
+    if (!email) {
+      return res.status(400).json({
+        success: false,
+        message: 'Email address is required'
+      });
+    }
+    
+    let filter = { email: email.toLowerCase() };
+    
+    // Add additional lookup criteria
+    if (warrantyNumber) {
+      filter.warrantyNumber = warrantyNumber;
+    } else if (orderId) {
+      filter.orderId = orderId;
+    } else if (serialNumber) {
+      // Assuming you have a serialNumber field, otherwise use warrantyNumber
+      filter.warrantyNumber = serialNumber;
+    } else {
+      return res.status(400).json({
+        success: false,
+        message: 'Please provide warranty number, order ID, or serial number'
+      });
+    }
+    
+    console.log('🔍 Searching with filter:', filter);
+    
+    const warranty = await WarrantyRegistration.findOne(filter);
+    
+    if (!warranty) {
+      return res.json({
+        success: false,
+        message: 'Warranty not found. Please check your information and try again.'
+      });
+    }
+    
+    // Check if warranty is expired
+    const isExpired = new Date() > new Date(warranty.warrantyEndDate);
+    
+    // Check for existing claims
+    const existingClaims = await Claim.find({ 
+      warrantyId: warranty._id,
+      status: { $nin: ['cancelled', 'completed'] }
+    });
+    
+    console.log('✅ Warranty found:', {
+      warrantyNumber: warranty.warrantyNumber,
+      product: warranty.product,
+      isExpired,
+      existingClaims: existingClaims.length
+    });
+    
+    res.json({
+      success: true,
+      warranty: {
+        _id: warranty._id,
+        warrantyNumber: warranty.warrantyNumber,
+        product: warranty.product,
+        fullName: warranty.fullName,
+        email: warranty.email,
+        purchaseDate: warranty.purchaseDate,
+        warrantyEndDate: warranty.warrantyEndDate,
+        status: warranty.status,
+        isExpired,
+        existingClaims: existingClaims.map(claim => ({
+          claimNumber: claim.claimNumber,
+          status: claim.status,
+          submittedAt: claim.submittedAt
+        }))
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Warranty lookup error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during warranty lookup'
+    });
+  }
+});
+
+// Submit Warranty Claim
+app.post('/api/claims/submit', async (req, res) => {
+  try {
+    console.log('📝 Claim submission request:', req.body);
+    
+    const {
+      warrantyNumber,
+      email,
+      warrantyId,
+      issueType,
+      issueDescription,
+      issueStartDate,
+      usageFrequency,
+      troubleshootingSteps,
+      preferredResolution,
+      contactPhone,
+      contactMethod,
+      shippingAddress,
+      additionalNotes
+    } = req.body;
+    
+    // Validation
+    const requiredFields = [
+      'warrantyNumber', 'email', 'warrantyId', 'issueType', 
+      'issueDescription', 'preferredResolution', 'contactPhone', 'shippingAddress'
+    ];
+    
+    for (const field of requiredFields) {
+      if (!req.body[field]) {
+        return res.status(400).json({
+          success: false,
+          message: `${field} is required`
+        });
+      }
+    }
+    
+    // Verify warranty exists and matches
+    const warranty = await WarrantyRegistration.findById(warrantyId);
+    if (!warranty || warranty.email.toLowerCase() !== email.toLowerCase()) {
+      return res.status(400).json({
+        success: false,
+        message: 'Invalid warranty information'
+      });
+    }
+    
+    // Check for duplicate active claims
+    const existingClaim = await Claim.findOne({
+      warrantyId: warrantyId,
+      status: { $nin: ['completed', 'cancelled', 'denied'] }
+    });
+    
+    if (existingClaim) {
+      return res.status(400).json({
+        success: false,
+        message: `You already have an active claim (${existingClaim.claimNumber}) for this warranty.`
+      });
+    }
+    
+    // Create new claim
+    const claimData = {
+      warrantyId,
+      warrantyNumber,
+      customerName: warranty.fullName,
+      customerEmail: email,
+      contactPhone,
+      shippingAddress,
+      contactMethod: contactMethod || 'email',
+      issueType,
+      issueDescription,
+      issueStartDate: issueStartDate ? new Date(issueStartDate) : null,
+      usageFrequency,
+      troubleshootingSteps: troubleshootingSteps || [],
+      additionalNotes,
+      preferredResolution,
+      status: 'submitted',
+      priority: determinePriority(issueType, warranty)
+    };
+    
+    const claim = new Claim(claimData);
+    await claim.save();
+    
+    console.log('✅ Claim created:', claim.claimNumber);
+    
+    // Send confirmation email (integrate with your email service)
+    try {
+      await sendClaimConfirmationEmail(claim, warranty);
+      claim.emailsSent.push({
+        type: 'claim-submitted',
+        status: 'sent'
+      });
+      await claim.save();
+    } catch (emailError) {
+      console.error('⚠️ Email sending failed:', emailError);
+      // Don't fail the claim submission for email errors
+    }
+    
+    // Update warranty status if needed
+    if (warranty.status === 'active') {
+      warranty.status = 'claimed';
+      await warranty.save();
+    }
+    
+    res.json({
+      success: true,
+      message: 'Claim submitted successfully',
+      claimNumber: claim.claimNumber,
+      claimId: claim._id,
+      claim: {
+        claimNumber: claim.claimNumber,
+        status: claim.status,
+        submittedAt: claim.submittedAt,
+        expectedResolution: getExpectedResolutionTime(claim.priority)
+      }
+    });
+    
+  } catch (error) {
+    console.error('❌ Claim submission error:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Server error during claim submission'
+    });
+  }
+});
+
+// CLAIMS ADMIN ROUTES
+
+// Get all claims for admin
+app.get('/api/admin/claims', authenticateAdmin, async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 50;
+    const skip = (page - 1) * limit;
+
+    const filter = {};
+    
+    // Filter by status
+    if (req.query.status) filter.status = req.query.status;
+    
+    // Filter by priority
+    if (req.query.priority) filter.priority = req.query.priority;
+    
+    // Filter by issue type
+    if (req.query.issueType) filter.issueType = req.query.issueType;
+    
+    // Search across multiple fields
+    if (req.query.search) {
+      const searchTerm = req.query.search;
+      filter.$or = [
+        { claimNumber: new RegExp(searchTerm, 'i') },
+        { warrantyNumber: new RegExp(searchTerm, 'i') },
+        { customerName: new RegExp(searchTerm, 'i') },
+        { customerEmail: new RegExp(searchTerm, 'i') }
+      ];
+    }
+
+    const claims = await Claim.find(filter)
+      .populate('warrantyId', 'product fullName email')
+      .skip(skip)
+      .limit(limit)
+      .sort({ submittedAt: -1 });
+
+    const total = await Claim.countDocuments(filter);
+
+    res.json({
+      claims,
+      pagination: {
+        page,
+        limit,
+        total,
+        pages: Math.ceil(total / limit)
+      }
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Get single claim by ID
+app.get('/api/admin/claims/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const claim = await Claim.findById(req.params.id)
+      .populate('warrantyId');
+    
+    if (!claim) {
+      return res.status(404).json({ error: 'Claim not found' });
+    }
+
+    res.json(claim);
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid claim ID' });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Update claim (admin action)
+app.put('/api/admin/claims/:id', authenticateAdmin, async (req, res) => {
+  try {
+    const claimId = req.params.id;
+    const updateData = req.body;
+    
+    // Add admin tracking
+    if (updateData.status && updateData.status !== 'submitted') {
+      updateData.reviewStartedAt = updateData.reviewStartedAt || new Date();
+      updateData.assignedTo = updateData.assignedTo || req.admin.username;
+    }
+    
+    if (['approved', 'denied', 'completed'].includes(updateData.status)) {
+      updateData.resolvedAt = new Date();
+    }
+    
+    // Add admin note if provided
+    if (updateData.adminNote) {
+      const claim = await Claim.findById(claimId);
+      if (claim) {
+        claim.adminNotes.push({
+          note: updateData.adminNote,
+          addedBy: req.admin.username,
+          addedAt: new Date()
+        });
+        delete updateData.adminNote;
+        await claim.save();
+      }
+    }
+
+    const updatedClaim = await Claim.findByIdAndUpdate(
+      claimId,
+      updateData,
+      { new: true, runValidators: true }
+    ).populate('warrantyId');
+
+    if (!updatedClaim) {
+      return res.status(404).json({ error: 'Claim not found' });
+    }
+
+    console.log(`Claim ${updatedClaim.claimNumber} updated by ${req.admin.username}`);
+
+    res.json(updatedClaim);
+  } catch (error) {
+    if (error.name === 'CastError') {
+      return res.status(400).json({ error: 'Invalid claim ID' });
+    }
+    if (error.name === 'ValidationError') {
+      return res.status(400).json({ error: error.message });
+    }
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// Claims statistics for admin dashboard
+app.get('/api/admin/claims/stats', authenticateAdmin, async (req, res) => {
+  try {
+    const totalClaims = await Claim.countDocuments();
+    const pendingClaims = await Claim.countDocuments({ status: 'submitted' });
+    const underReviewClaims = await Claim.countDocuments({ status: 'under-review' });
+    const approvedClaims = await Claim.countDocuments({ status: 'approved' });
+    const deniedClaims = await Claim.countDocuments({ status: 'denied' });
+    const completedClaims = await Claim.countDocuments({ status: 'completed' });
+
+    // Claims by issue type
+    const issueTypeStats = await Claim.aggregate([
+      { $group: { _id: '$issueType', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Claims by priority
+    const priorityStats = await Claim.aggregate([
+      { $group: { _id: '$priority', count: { $sum: 1 } } },
+      { $sort: { count: -1 } }
+    ]);
+
+    // Recent claims (last 7 days)
+    const sevenDaysAgo = new Date();
+    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+    const recentClaims = await Claim.countDocuments({
+      submittedAt: { $gte: sevenDaysAgo }
+    });
+
+    res.json({
+      totalClaims,
+      pendingClaims,
+      underReviewClaims,
+      approvedClaims,
+      deniedClaims,
+      completedClaims,
+      recentClaims,
+      issueTypeStats,
+      priorityStats
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// EXISTING ROUTES (keeping all your current functionality)
 
 // Warranty Number Management
 app.post('/api/admin/warranty-numbers/upload', authenticateAdmin, upload.single('csv'), async (req, res) => {
@@ -778,6 +1339,11 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
     });
     const claimedWarranties = await WarrantyRegistration.countDocuments({ status: 'claimed' });
 
+    // Claims stats (new)
+    const totalClaims = await Claim.countDocuments();
+    const pendingClaims = await Claim.countDocuments({ status: 'submitted' });
+    const underReviewClaims = await Claim.countDocuments({ status: 'under-review' });
+
     // Shopify integration stats
     const shopifySuccessful = await WarrantyRegistration.countDocuments({ shopifyIntegrationStatus: 'success' });
     const shopifyFailed = await WarrantyRegistration.countDocuments({ shopifyIntegrationStatus: 'failed' });
@@ -802,8 +1368,8 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
     const recentRegistrations = await WarrantyRegistration.countDocuments({
       createdAt: { $gte: sevenDaysAgo }
     });
-    const recentClaims = await WarrantyRegistration.countDocuments({
-      claimDate: { $gte: sevenDaysAgo }
+    const recentClaims = await Claim.countDocuments({
+      submittedAt: { $gte: sevenDaysAgo }
     });
 
     res.json({
@@ -815,6 +1381,13 @@ app.get('/api/admin/stats', authenticateAdmin, async (req, res) => {
       claimedWarranties,
       recentRegistrations,
       recentClaims,
+      // New claims data
+      claimsOverview: {
+        totalClaims,
+        pendingClaims,
+        underReviewClaims,
+        needsAttention: pendingClaims + underReviewClaims
+      },
       shopifyIntegration: {
         successful: shopifySuccessful,
         failed: shopifyFailed,
@@ -961,7 +1534,7 @@ app.get('/api/health', (req, res) => {
   res.json({ 
     status: 'healthy', 
     timestamp: new Date().toISOString(),
-    version: '2.1.0'
+    version: '2.2.0'
   });
 });
 
@@ -1000,6 +1573,7 @@ app.listen(PORT, async () => {
   console.log(`🔍 API Health: http://localhost:${PORT}/api/health`);
   console.log(`🛍️ Shopify Test: http://localhost:${PORT}/api/test-shopify`);
   console.log(`📧 Email Test: http://localhost:${PORT}/api/test-email`);
+  console.log(`🛠️ Claims System: Enabled`);
   await initializeAdmin();
 });
 
