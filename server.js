@@ -682,7 +682,22 @@ app.get('/api/health', (req, res) => {
     version: '2.0.0'
   });
 });
+// Add this line at the top with your other requires
+const ShopifyTester = require('./shopifyTest');
 
+// Add this route before app.listen()
+app.get('/api/test-shopify', async (req, res) => {
+  try {
+    const tester = new ShopifyTester();
+    const result = await tester.testConnection();
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ 
+      success: false, 
+      error: error.message 
+    });
+  }
+});
 // Start server
 app.listen(PORT, async () => {
   console.log(`🚀 LDAS Warranty System running on port ${PORT}`);
