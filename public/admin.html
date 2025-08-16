@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LDAS Warranty Admin Panel</title>
+    <title>LDAS Warranty Admin Panel - Enhanced</title>
     <style>
         * {
             margin: 0;
@@ -54,6 +54,7 @@
             transition: all 0.3s ease;
             text-decoration: none;
             display: inline-block;
+            margin: 2px;
         }
         
         .btn-primary {
@@ -75,9 +76,27 @@
             color: white;
         }
         
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
         .btn-success {
             background: #22c55e;
             color: white;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
         }
         
         .login-container {
@@ -204,6 +223,11 @@
             background: #f9fafb;
         }
         
+        .actions-column {
+            width: 150px;
+            text-align: center;
+        }
+        
         .pagination {
             display: flex;
             justify-content: center;
@@ -251,11 +275,13 @@
         
         .modal-content {
             background-color: white;
-            margin: 5% auto;
+            margin: 2% auto;
             padding: 30px;
             border-radius: 10px;
             width: 90%;
-            max-width: 500px;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
         }
         
         .close {
@@ -268,26 +294,6 @@
         
         .close:hover {
             color: black;
-        }
-        
-        .file-upload-area {
-            border: 2px dashed #d1d5db;
-            border-radius: 10px;
-            padding: 40px;
-            text-align: center;
-            margin: 20px 0;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .file-upload-area:hover {
-            border-color: #10b981;
-            background: #f0fdf4;
-        }
-        
-        .file-upload-area.dragover {
-            border-color: #10b981;
-            background: #f0fdf4;
         }
         
         .hidden {
@@ -337,6 +343,56 @@
             background: #fef2f2;
             color: #dc2626;
             border: 1px solid #fecaca;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+        
+        .confirmation-dialog {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .confirmation-dialog h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .confirmation-dialog p {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-column {
+                width: auto;
+            }
+            
+            .btn-sm {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
         }
     </style>
 </head>
@@ -392,7 +448,7 @@
 
                 <!-- Warranty Numbers Tab -->
                 <div id="warranty-numbers" class="tab-pane">
-                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h3>Warranty Number Management</h3>
                         <div>
                             <button class="btn btn-primary" onclick="openAddWarrantyModal()">Add Single</button>
@@ -439,9 +495,9 @@
                     <div id="warrantyPagination" class="pagination"></div>
                 </div>
 
-                <!-- Registrations Tab -->
+                <!-- Enhanced Registrations Tab -->
                 <div id="registrations" class="tab-pane">
-                    <div style="display: flex; justify-content: between; align-items: center; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                         <h3>Warranty Registrations</h3>
                         <button class="btn btn-success" onclick="exportRegistrations()">Export CSV</button>
                     </div>
@@ -481,6 +537,7 @@
                                     <th>Purchase Date</th>
                                     <th>Status</th>
                                     <th>Registered</th>
+                                    <th class="actions-column">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="registrationsBody">
@@ -525,23 +582,115 @@
         </div>
     </div>
 
-    <!-- Bulk Upload Modal -->
-    <div id="uploadModal" class="modal">
+    <!-- Edit Registration Modal -->
+    <div id="editRegistrationModal" class="modal">
         <div class="modal-content">
-            <span class="close" onclick="closeModal('uploadModal')">&times;</span>
-            <h3>Bulk Upload Warranty Numbers</h3>
-            <p><strong>CSV Format:</strong> warrantyNumber,productId,productName</p>
-            <p><strong>Example:</strong></p>
-            <pre style="background: #f3f4f6; padding: 10px; border-radius: 5px; font-size: 12px;">12345,th11,LDAS TH11 Headset
-12346,g7,LDAS G7 Headset
-12347,g10,LDAS G10 Headset</pre>
-            <div class="file-upload-area" id="fileUploadArea">
-                <p>Click here or drag and drop your CSV file</p>
-                <input type="file" id="csvFileInput" accept=".csv" style="display: none;">
+            <span class="close" onclick="closeModal('editRegistrationModal')">&times;</span>
+            <h3>Edit Warranty Registration</h3>
+            <form id="editRegistrationForm">
+                <input type="hidden" id="editRegistrationId">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editFirstName">First Name:</label>
+                        <input type="text" id="editFirstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLastName">Last Name:</label>
+                        <input type="text" id="editLastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editProduct">Product:</label>
+                        <select id="editProduct" required>
+                            <option value="th11">TH11 Headset</option>
+                            <option value="g7">G7 Headset</option>
+                            <option value="g10">G10 Headset</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSource">Purchase Source:</label>
+                        <select id="editSource" required>
+                            <option value="Amazon.ca">Amazon.ca</option>
+                            <option value="Best Buy">Best Buy</option>
+                            <option value="LDAS.ca">LDAS.ca</option>
+                            <option value="Walmart">Walmart</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editOrderId">Order ID:</label>
+                        <input type="text" id="editOrderId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editWarrantyNumber">Warranty Number:</label>
+                        <input type="text" id="editWarrantyNumber" pattern="[0-9]{4,5}" required readonly>
+                        <small>Warranty number cannot be changed</small>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPurchaseDate">Purchase Date:</label>
+                    <input type="date" id="editPurchaseDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editStatus">Status:</label>
+                    <select id="editStatus" required>
+                        <option value="active">Active</option>
+                        <option value="expired">Expired</option>
+                        <option value="claimed">Claimed</option>
+                    </select>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Update Registration</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editRegistrationModal')">Cancel</button>
+                </div>
+            </form>
+            <div id="editRegistrationError" class="alert alert-error hidden"></div>
+            <div id="editRegistrationSuccess" class="alert alert-success hidden"></div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('deleteConfirmModal')">&times;</span>
+            <h3>Confirm Deletion</h3>
+            <div class="confirmation-dialog">
+                <h4>⚠️ Are you sure?</h4>
+                <p id="deleteConfirmText">This action cannot be undone.</p>
+                <div class="button-group">
+                    <button id="confirmDeleteBtn" class="btn btn-danger">Yes, Delete</button>
+                    <button class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Cancel</button>
+                </div>
             </div>
-            <button id="uploadBtn" class="btn btn-primary" onclick="uploadCSV()" disabled>Upload</button>
-            <div id="uploadError" class="alert alert-error hidden"></div>
-            <div id="uploadSuccess" class="alert alert-success hidden"></div>
+        </div>
+    </div>
+
+    <!-- Unlink Confirmation Modal -->
+    <div id="unlinkConfirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('unlinkConfirmModal')">&times;</span>
+            <h3>Unlink Warranty Number</h3>
+            <div class="confirmation-dialog">
+                <h4>🔗 Unlink Warranty Number?</h4>
+                <p id="unlinkConfirmText">This will make the warranty number available for reuse.</p>
+                <div class="button-group">
+                    <button id="confirmUnlinkBtn" class="btn btn-warning">Yes, Unlink</button>
+                    <button class="btn btn-secondary" onclick="closeModal('unlinkConfirmModal')">Cancel</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -551,8 +700,10 @@
         let currentToken = localStorage.getItem('adminToken');
         let currentPage = 1;
         let debounceTimer;
+        let currentEditingId = null;
+        let currentActionType = null;
 
-        // Initialize when page loads
+        // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             if (currentToken) {
                 showAdminPanel();
@@ -560,11 +711,9 @@
             } else {
                 showLogin();
             }
-            setupFileUpload();
             setupProductNameMapping();
         });
 
-        // Show/hide panels
         function showLogin() {
             document.getElementById('loginContainer').classList.remove('hidden');
             document.getElementById('adminPanel').classList.add('hidden');
@@ -714,7 +863,7 @@
             `).join('');
         }
 
-        // Registrations Management
+        // Enhanced Registrations Management
         async function loadRegistrations(page = 1) {
             try {
                 const productFilter = document.getElementById('regProductFilter').value;
@@ -758,10 +907,177 @@
                             ${status.charAt(0).toUpperCase() + status.slice(1)}
                         </span></td>
                         <td>${new Date(reg.createdAt).toLocaleDateString()}</td>
+                        <td class="actions-column">
+                            <button class="btn btn-primary btn-sm" onclick="editRegistration('${reg._id}')">Edit</button>
+                            <button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">Unlink</button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteRegistration('${reg._id}', '${reg.fullName}')">Delete</button>
+                        </td>
                     </tr>
                 `;
             }).join('');
         }
+
+        // Edit Registration Functions
+        async function editRegistration(registrationId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const registration = await response.json();
+                    populateEditForm(registration);
+                    document.getElementById('editRegistrationModal').style.display = 'block';
+                } else {
+                    alert('Failed to load registration details');
+                }
+            } catch (error) {
+                console.error('Error loading registration:', error);
+                alert('Failed to load registration details');
+            }
+        }
+
+        function populateEditForm(registration) {
+            document.getElementById('editRegistrationId').value = registration._id;
+            document.getElementById('editFirstName').value = registration.firstName;
+            document.getElementById('editLastName').value = registration.lastName;
+            document.getElementById('editEmail').value = registration.email;
+            document.getElementById('editProduct').value = registration.productId;
+            document.getElementById('editSource').value = registration.source;
+            document.getElementById('editOrderId').value = registration.orderId;
+            document.getElementById('editWarrantyNumber').value = registration.warrantyNumber;
+            document.getElementById('editPurchaseDate').value = registration.purchaseDate.split('T')[0];
+            document.getElementById('editStatus').value = registration.status;
+        }
+
+        document.getElementById('editRegistrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const registrationId = document.getElementById('editRegistrationId').value;
+            const updatedData = {
+                firstName: document.getElementById('editFirstName').value.trim(),
+                lastName: document.getElementById('editLastName').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                productId: document.getElementById('editProduct').value,
+                source: document.getElementById('editSource').value,
+                orderId: document.getElementById('editOrderId').value.trim(),
+                purchaseDate: document.getElementById('editPurchaseDate').value,
+                status: document.getElementById('editStatus').value
+            };
+
+            // Update full name
+            updatedData.fullName = `${updatedData.firstName} ${updatedData.lastName}`;
+            
+            // Update product name based on productId
+            const productNames = {
+                'th11': 'LDAS TH11 Headset',
+                'g7': 'LDAS G7 Headset',
+                'g10': 'LDAS G10 Headset'
+            };
+            updatedData.product = productNames[updatedData.productId];
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('editRegistrationSuccess', 'Registration updated successfully!');
+                    setTimeout(() => {
+                        closeModal('editRegistrationModal');
+                        loadRegistrations();
+                        loadDashboard(); // Refresh stats
+                    }, 1500);
+                } else {
+                    showError('editRegistrationError', data.error || 'Failed to update registration');
+                }
+            } catch (error) {
+                console.error('Error updating registration:', error);
+                showError('editRegistrationError', 'Failed to update registration');
+            }
+        });
+
+        // Delete Registration Functions
+        function deleteRegistration(registrationId, customerName) {
+            currentEditingId = registrationId;
+            currentActionType = 'delete';
+            document.getElementById('deleteConfirmText').textContent = 
+                `Are you sure you want to delete the warranty registration for ${customerName}? This action cannot be undone and will make the warranty number available for reuse.`;
+            document.getElementById('deleteConfirmModal').style.display = 'block';
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+            if (currentActionType !== 'delete' || !currentEditingId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${currentEditingId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeModal('deleteConfirmModal');
+                    alert('Registration deleted successfully!');
+                    loadRegistrations();
+                    loadDashboard(); // Refresh stats
+                } else {
+                    alert(data.error || 'Failed to delete registration');
+                }
+            } catch (error) {
+                console.error('Error deleting registration:', error);
+                alert('Failed to delete registration');
+            } finally {
+                currentEditingId = null;
+                currentActionType = null;
+            }
+        });
+
+        // Unlink Warranty Functions
+        function unlinkWarranty(registrationId, warrantyNumber) {
+            currentEditingId = registrationId;
+            currentActionType = 'unlink';
+            document.getElementById('unlinkConfirmText').textContent = 
+                `Are you sure you want to unlink warranty number ${warrantyNumber}? This will keep the registration but make the warranty number available for reuse by another customer.`;
+            document.getElementById('unlinkConfirmModal').style.display = 'block';
+        }
+
+        document.getElementById('confirmUnlinkBtn').addEventListener('click', async function() {
+            if (currentActionType !== 'unlink' || !currentEditingId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${currentEditingId}/unlink`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeModal('unlinkConfirmModal');
+                    alert('Warranty number unlinked successfully!');
+                    loadRegistrations();
+                    loadWarrantyNumbers(); // Refresh warranty numbers to show as available
+                    loadDashboard(); // Refresh stats
+                } else {
+                    alert(data.error || 'Failed to unlink warranty number');
+                }
+            } catch (error) {
+                console.error('Error unlinking warranty:', error);
+                alert('Failed to unlink warranty number');
+            } finally {
+                currentEditingId = null;
+                currentActionType = null;
+            }
+        });
 
         // Pagination
         function displayPagination(containerId, pagination, loadFunction) {
@@ -797,25 +1113,24 @@
             document.getElementById('addWarrantyModal').style.display = 'block';
         }
 
-        function openUploadModal() {
-            document.getElementById('uploadModal').style.display = 'block';
-        }
-
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+            
+            // Reset forms and clear messages
             if (modalId === 'addWarrantyModal') {
                 document.getElementById('addWarrantyForm').reset();
                 hideAlert('addWarrantyError');
                 hideAlert('addWarrantySuccess');
             }
-            if (modalId === 'uploadModal') {
-                const fileInput = document.getElementById('csvFileInput');
-                if (fileInput) fileInput.value = '';
-                document.getElementById('uploadBtn').disabled = true;
-                document.getElementById('fileUploadArea').innerHTML = '<p>Click here or drag and drop your CSV file</p>';
-                hideAlert('uploadError');
-                hideAlert('uploadSuccess');
+            if (modalId === 'editRegistrationModal') {
+                document.getElementById('editRegistrationForm').reset();
+                hideAlert('editRegistrationError');
+                hideAlert('editRegistrationSuccess');
             }
+            
+            // Reset current editing state
+            currentEditingId = null;
+            currentActionType = null;
         }
 
         // Add single warranty number
@@ -842,6 +1157,7 @@
                     showSuccess('addWarrantySuccess', 'Warranty number added successfully!');
                     document.getElementById('addWarrantyForm').reset();
                     loadWarrantyNumbers();
+                    loadDashboard(); // Refresh stats
                 } else {
                     showError('addWarrantyError', data.error);
                 }
@@ -864,112 +1180,6 @@
             productSelect.addEventListener('change', function() {
                 productNameInput.value = productNames[this.value] || '';
             });
-        }
-
-        // File upload setup
-        function setupFileUpload() {
-            const fileUploadArea = document.getElementById('fileUploadArea');
-            const fileInput = document.getElementById('csvFileInput');
-            const uploadBtn = document.getElementById('uploadBtn');
-
-            fileUploadArea.addEventListener('click', () => fileInput.click());
-
-            fileInput.addEventListener('change', function() {
-                if (this.files.length > 0) {
-                    fileUploadArea.innerHTML = `<p>Selected: ${this.files[0].name}</p>`;
-                    uploadBtn.disabled = false;
-                }
-            });
-
-            // Drag and drop
-            fileUploadArea.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                this.classList.add('dragover');
-            });
-
-            fileUploadArea.addEventListener('dragleave', function() {
-                this.classList.remove('dragover');
-            });
-
-            fileUploadArea.addEventListener('drop', function(e) {
-                e.preventDefault();
-                this.classList.remove('dragover');
-                
-                const files = e.dataTransfer.files;
-                if (files.length > 0 && files[0].name.toLowerCase().endsWith('.csv')) {
-                    fileInput.files = files;
-                    this.innerHTML = `<p>Selected: ${files[0].name}</p>`;
-                    uploadBtn.disabled = false;
-                }
-            });
-        }
-
-        // Upload CSV - FIXED VERSION
-        async function uploadCSV() {
-            console.log('Upload function called');
-            
-            const fileInput = document.getElementById('csvFileInput');
-            console.log('File input element:', fileInput);
-            
-            if (!fileInput) {
-                showError('uploadError', 'File input not found. Please refresh and try again.');
-                return;
-            }
-            
-            if (!fileInput.files || fileInput.files.length === 0) {
-                showError('uploadError', 'Please select a CSV file first');
-                return;
-            }
-            
-            const file = fileInput.files[0];
-            console.log('Selected file:', file);
-
-            if (!file.name.toLowerCase().endsWith('.csv')) {
-                showError('uploadError', 'Please select a CSV file');
-                return;
-            }
-
-            // Show uploading state
-            const uploadBtn = document.getElementById('uploadBtn');
-            const originalText = uploadBtn.textContent;
-            uploadBtn.textContent = 'Uploading...';
-            uploadBtn.disabled = true;
-
-            const formData = new FormData();
-            formData.append('csv', file);
-
-            try {
-                const response = await fetch(`${API_BASE}/admin/warranty-numbers/upload`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${currentToken}` },
-                    body: formData
-                });
-
-                const data = await response.json();
-                console.log('Upload response:', data);
-
-                if (response.ok) {
-                    let message = data.message;
-                    if (data.errors && data.errors.length > 0) {
-                        message += `\n\nErrors:\n${data.errors.join('\n')}`;
-                    }
-                    showSuccess('uploadSuccess', message);
-                    loadWarrantyNumbers();
-                    
-                    // Reset form
-                    fileInput.value = '';
-                    document.getElementById('fileUploadArea').innerHTML = '<p>Click here or drag and drop your CSV file</p>';
-                } else {
-                    showError('uploadError', data.error || 'Upload failed');
-                }
-            } catch (error) {
-                console.error('Upload error:', error);
-                showError('uploadError', 'Upload failed: ' + error.message);
-            } finally {
-                // Reset button
-                uploadBtn.textContent = originalText;
-                uploadBtn.disabled = false;
-            }
         }
 
         // Export registrations
