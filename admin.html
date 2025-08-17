@@ -4,115 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LDAS Warranty Admin Panel - Enhanced</title>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        :root {
-            /* Light Theme Variables */
-            --primary-color: #10b981;
-            --primary-dark: #059669;
-            --primary-light: #34d399;
-            --secondary-color: #6b7280;
-            --accent-color: #3b82f6;
-            --success-color: #22c55e;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --info-color: #06b6d4;
-            
-            /* Light Theme Colors */
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #f1f5f9;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --border-color: #e2e8f0;
-            --border-light: #f1f5f9;
-            --shadow-light: rgba(0, 0, 0, 0.05);
-            --shadow-medium: rgba(0, 0, 0, 0.1);
-            --shadow-heavy: rgba(0, 0, 0, 0.15);
-            
-            /* Sidebar */
-            --sidebar-bg: #ffffff;
-            --sidebar-border: #e2e8f0;
-            --sidebar-text: #64748b;
-            --sidebar-text-active: #10b981;
-            --sidebar-hover: #f8fafc;
-            
-            /* Header */
-            --header-bg: #ffffff;
-            --header-border: #e2e8f0;
-            --header-text: #1e293b;
-            
-            /* Cards */
-            --card-bg: #ffffff;
-            --card-border: #e2e8f0;
-            --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-            
-            /* Form Elements */
-            --input-bg: #ffffff;
-            --input-border: #d1d5db;
-            --input-focus: #10b981;
-            --input-text: #374151;
-            
-            /* Tables */
-            --table-bg: #ffffff;
-            --table-border: #e5e7eb;
-            --table-header-bg: #f9fafb;
-            --table-hover: #f9fafb;
-            
-            /* Modal */
-            --modal-bg: #ffffff;
-            --modal-overlay: rgba(0, 0, 0, 0.5);
-        }
-
-        [data-theme="dark"] {
-            /* Dark Theme Colors */
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --border-light: #475569;
-            --shadow-light: rgba(0, 0, 0, 0.2);
-            --shadow-medium: rgba(0, 0, 0, 0.3);
-            --shadow-heavy: rgba(0, 0, 0, 0.4);
-            
-            /* Sidebar */
-            --sidebar-bg: #1e293b;
-            --sidebar-border: #334155;
-            --sidebar-text: #cbd5e1;
-            --sidebar-text-active: #34d399;
-            --sidebar-hover: #334155;
-            
-            /* Header */
-            --header-bg: #1e293b;
-            --header-border: #334155;
-            --header-text: #f8fafc;
-            
-            /* Cards */
-            --card-bg: #1e293b;
-            --card-border: #334155;
-            --card-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
-            
-            /* Form Elements */
-            --input-bg: #334155;
-            --input-border: #475569;
-            --input-focus: #34d399;
-            --input-text: #f8fafc;
-            
-            /* Tables */
-            --table-bg: #1e293b;
-            --table-border: #334155;
-            --table-header-bg: #334155;
-            --table-hover: #334155;
-            
-            /* Modal */
-            --modal-bg: #1e293b;
-            --modal-overlay: rgba(0, 0, 0, 0.7);
-        }
-
         * {
             margin: 0;
             padding: 0;
@@ -120,39 +12,30 @@
         }
         
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            line-height: 1.6;
-            transition: all 0.3s ease;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fa;
+            color: #333;
         }
-
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-        }
-
-        /* Main Content */
+        
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
-
+        
         .header {
-            background: var(--header-bg);
+            background: #fff;
             padding: 20px;
             border-radius: 10px;
-            box-shadow: var(--card-shadow);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             margin-bottom: 30px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border: 1px solid var(--border-color);
         }
         
         .header h1 {
-            color: var(--primary-color);
+            color: #10b981;
             font-size: 24px;
         }
         
@@ -161,836 +44,565 @@
             align-items: center;
             gap: 15px;
         }
-
-        .theme-toggle {
-            background: var(--bg-tertiary);
+        
+        .btn {
+            padding: 10px 20px;
             border: none;
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            border-radius: 5px;
             cursor: pointer;
-            color: var(--text-secondary);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            margin: 2px;
+        }
+        
+        .btn-primary {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #059669;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        .btn-warning {
+            background: #f59e0b;
+            color: white;
+        }
+        
+        .btn-warning:hover {
+            background: #d97706;
+        }
+        
+        .btn-success {
+            background: #22c55e;
+            color: white;
+        }
+        
+        .btn-info {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-sm {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            margin: 100px auto;
+            background: white;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+        }
+        
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #10b981;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+        }
+        
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 36px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .stat-label {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .tabs {
+            display: flex;
+            background: white;
+            border-radius: 10px 10px 0 0;
+            overflow: hidden;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 15px 20px;
+            background: #f9fafb;
+            border: none;
+            cursor: pointer;
             font-size: 16px;
             transition: all 0.3s ease;
         }
-
-        .theme-toggle:hover {
-            background: var(--primary-color);
-            color: white;
-            transform: scale(1.05);
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 24px;
-            box-shadow: var(--card-shadow);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 8px 25px var(--shadow-medium);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--primary-color), var(--primary-light));
-        }
-
-        .stat-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 16px;
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 20px;
-        }
-
-        .stat-trend {
-            font-size: 12px;
-            padding: 4px 8px;
-            border-radius: 20px;
-            font-weight: 600;
-        }
-
-        .trend-up {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success-color);
-        }
-
-        .trend-down {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger-color);
-        }
-
-        .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        /* Cards */
-        .card {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            box-shadow: var(--card-shadow);
-            overflow: hidden;
-            transition: all 0.3s ease;
-        }
-
-        .card-header {
-            padding: 24px 24px 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .card-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .card-body {
-            padding: 24px;
-        }
-
-        /* Tabs */
-        .tabs-container {
-            margin-bottom: 30px;
-        }
-
-        .tabs {
-            display: flex;
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
-        }
-
-        .tab {
-            flex: 1;
-            padding: 16px 24px;
-            background: transparent;
-            border: none;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 500;
-            color: var(--text-secondary);
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .tab:hover {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
+        
         .tab.active {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+            background: #10b981;
             color: white;
-            font-weight: 600;
         }
-
+        
         .tab-content {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            box-shadow: var(--card-shadow);
+            background: white;
             padding: 30px;
-            margin-top: -1px;
+            border-radius: 0 0 10px 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
-
+        
         .tab-pane {
             display: none;
         }
-
+        
         .tab-pane.active {
             display: block;
         }
-
-        /* Forms */
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 14px;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--input-border);
-            border-radius: 10px;
-            font-size: 14px;
-            background: var(--input-bg);
-            color: var(--input-text);
-            transition: all 0.3s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: var(--input-focus);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 10px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin: 4px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            color: white;
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-secondary {
-            background: var(--secondary-color);
-            color: white;
-        }
-
-        .btn-danger {
-            background: var(--danger-color);
-            color: white;
-        }
-
-        .btn-warning {
-            background: var(--warning-color);
-            color: white;
-        }
-
-        .btn-success {
-            background: var(--success-color);
-            color: white;
-        }
-
-        .btn-info {
-            background: var(--info-color);
-            color: white;
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 12px;
-        }
-
-        /* Tables */
+        
         .table-container {
-            background: var(--table-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            overflow: hidden;
-            box-shadow: var(--card-shadow);
+            overflow-x: auto;
+            margin-top: 20px;
         }
-
-        .table {
+        
+        table {
             width: 100%;
             border-collapse: collapse;
+            background: white;
         }
-
-        .table th {
-            background: var(--table-header-bg);
-            padding: 16px;
+        
+        th, td {
+            padding: 12px;
             text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        th {
+            background: #f9fafb;
             font-weight: 600;
-            color: var(--text-primary);
-            border-bottom: 1px solid var(--table-border);
-            font-size: 14px;
+            color: #374151;
         }
-
-        .table td {
-            padding: 16px;
-            border-bottom: 1px solid var(--table-border);
-            color: var(--text-secondary);
+        
+        tr:hover {
+            background: #f9fafb;
         }
-
-        .table tr:hover {
-            background: var(--table-hover);
+        
+        .actions-column {
+            width: 250px;
+            text-align: center;
         }
-
-        /* Status Badges */
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
         }
-
-        .status-active {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success-color);
+        
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid #d1d5db;
+            background: white;
+            cursor: pointer;
+            border-radius: 5px;
         }
-
-        .status-expired {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger-color);
+        
+        .pagination button.active {
+            background: #10b981;
+            color: white;
+            border-color: #10b981;
         }
-
-        .status-claimed {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-color);
+        
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
         }
-
-        .status-used {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning-color);
+        
+        .filters > div {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
         }
-
-        .status-unused {
-            background: rgba(107, 114, 128, 0.1);
-            color: var(--secondary-color);
-        }
-
-        /* Alerts */
-        .alert {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin: 20px 0;
-            font-weight: 500;
-            border-left: 4px solid;
-        }
-
-        .alert-success {
-            background: rgba(34, 197, 94, 0.1);
-            color: var(--success-color);
-            border-color: var(--success-color);
-        }
-
-        .alert-error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--danger-color);
-            border-color: var(--danger-color);
-        }
-
-        .alert-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning-color);
-            border-color: var(--warning-color);
-        }
-
-        .alert-info {
-            background: rgba(6, 182, 212, 0.1);
-            color: var(--info-color);
-            border-color: var(--info-color);
-        }
-
-        /* Modals */
+        
         .modal {
             display: none;
             position: fixed;
-            z-index: 2000;
+            z-index: 1000;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
-            background-color: var(--modal-overlay);
-            backdrop-filter: blur(4px);
+            background-color: rgba(0,0,0,0.5);
         }
-
+        
         .modal-content {
-            background: var(--modal-bg);
+            background-color: white;
             margin: 2% auto;
-            padding: 0;
-            border-radius: 16px;
+            padding: 30px;
+            border-radius: 10px;
             width: 90%;
             max-width: 600px;
             max-height: 90vh;
             overflow-y: auto;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
-            border: 1px solid var(--card-border);
         }
-
-        .modal-header {
-            padding: 24px 24px 0;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .modal-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
+        
         .close {
-            background: none;
-            border: none;
-            font-size: 24px;
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
             cursor: pointer;
-            color: var(--text-secondary);
-            padding: 8px;
-            border-radius: 6px;
-            transition: all 0.3s ease;
         }
-
+        
         .close:hover {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
+            color: black;
         }
-
-        .modal-body {
-            padding: 24px;
-        }
-
-        /* Search */
-        .search-container {
-            background: var(--card-bg);
-            border: 1px solid var(--card-border);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 30px;
-            box-shadow: var(--card-shadow);
-        }
-
-        .search-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-        }
-
-        .search-icon {
-            color: var(--primary-color);
-            font-size: 20px;
-        }
-
-        .search-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-
-        .search-form {
-            display: grid;
-            grid-template-columns: 1fr 200px auto;
-            gap: 16px;
-            align-items: end;
-        }
-
-        /* Utilities */
+        
         .hidden {
             display: none;
         }
-
-        .text-center {
-            text-align: center;
+        
+        .status-badge {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
         }
-
-        .mt-20 {
-            margin-top: 20px;
+        
+        .status-active {
+            background: #dcfce7;
+            color: #16a34a;
         }
-
-        .mb-20 {
-            margin-bottom: 20px;
+        
+        .status-expired {
+            background: #fef2f2;
+            color: #dc2626;
         }
-
-        .flex {
+        
+        .status-used {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .status-unused {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .status-claimed {
+            background: #f3e8ff;
+            color: #7c3aed;
+        }
+        
+        .alert {
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 5px;
+        }
+        
+        .alert-success {
+            background: #dcfce7;
+            color: #16a34a;
+            border: 1px solid #bbf7d0;
+        }
+        
+        .alert-error {
+            background: #fef2f2;
+            color: #dc2626;
+            border: 1px solid #fecaca;
+        }
+        
+        .alert-warning {
+            background: #fef3c7;
+            color: #d97706;
+            border: 1px solid #fde68a;
+        }
+        
+        .alert-info {
+            background: #dbeafe;
+            color: #2563eb;
+            border: 1px solid #bfdbfe;
+        }
+        
+        .confirmation-dialog {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .confirmation-dialog h4 {
+            color: #856404;
+            margin-bottom: 10px;
+        }
+        
+        .confirmation-dialog p {
+            color: #856404;
+            margin-bottom: 15px;
+        }
+        
+        .button-group {
             display: flex;
-        }
-
-        .justify-between {
-            justify-content: space-between;
-        }
-
-        .items-center {
-            align-items: center;
-        }
-
-        .gap-10 {
             gap: 10px;
         }
-
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-
-            .sidebar.open {
-                transform: translateX(0);
-            }
-
-            .main-content {
-                margin-left: 0;
-            }
-
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            }
-
-            .search-form {
-                grid-template-columns: 1fr;
-                gap: 16px;
-            }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
         }
-
-        @media (max-width: 768px) {
-            .content {
-                padding: 20px;
-            }
-
-            .header {
-                padding: 0 20px;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .tabs {
-                flex-direction: column;
-            }
-
-            .table-container {
-                overflow-x: auto;
-            }
-        }
-
-        /* Login Styles */
-        .login-container {
-            display: flex;
-            min-height: 100vh;
-            align-items: center;
-            justify-content: center;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
+        
+        /* Customer Search Styles */
+        .search-container {
+            background: #f8fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
             padding: 20px;
-        }
-
-        .login-card {
-            background: var(--card-bg);
-            border-radius: 20px;
-            padding: 40px;
-            width: 100%;
-            max-width: 400px;
-            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.2);
-            border: 1px solid var(--card-border);
-        }
-
-        .login-header {
-            text-align: center;
             margin-bottom: 30px;
         }
-
-        .login-logo {
-            width: 80px;
-            height: 80px;
-            background: linear-gradient(135deg, var(--primary-color), var(--primary-light));
-            border-radius: 20px;
+        
+        .search-header {
             display: flex;
             align-items: center;
-            justify-content: center;
-            margin: 0 auto 20px;
-            color: white;
-            font-size: 32px;
+            gap: 10px;
+            margin-bottom: 20px;
         }
-
-        .login-title {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--text-primary);
-            margin-bottom: 8px;
+        
+        .search-header h3 {
+            color: #1e293b;
+            font-size: 18px;
         }
-
-        .login-subtitle {
-            color: var(--text-secondary);
+        
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+        }
+        
+        .search-input {
+            padding: 12px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
             font-size: 14px;
+            transition: all 0.3s ease;
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #10b981;
+            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+        }
+        
+        .search-results {
+            margin-top: 20px;
+        }
+        
+        .customer-card {
+            background: white;
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .customer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .customer-info h4 {
+            color: #1e293b;
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+        
+        .customer-info p {
+            color: #64748b;
+            font-size: 14px;
+        }
+        
+        .warranty-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .warranty-detail {
+            background: #f8fafc;
+            padding: 12px;
+            border-radius: 6px;
+            border-left: 4px solid #10b981;
+        }
+        
+        .warranty-detail strong {
+            display: block;
+            color: #374151;
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .warranty-detail span {
+            color: #1e293b;
+            font-size: 14px;
+        }
+        
+        .no-results {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 15px;
+            display: block;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+            
+            .actions-column {
+                width: auto;
+            }
+            
+            .btn-sm {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+            
+            .warranty-info {
+                grid-template-columns: 1fr;
+            }
         }
     </style>
 </head>
 <body>
     <!-- Login Form -->
     <div id="loginContainer" class="login-container">
-        <div class="login-card">
-            <div class="login-header">
-                <div class="login-logo">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h2 class="login-title">Welcome Back</h2>
-                <p class="login-subtitle">Sign in to your admin account</p>
+        <h2>Admin Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required>
             </div>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label for="username" class="form-label">Username</label>
-                    <input type="text" id="username" class="form-control" placeholder="Enter your username" required>
-                </div>
-                <div class="form-group">
-                    <label for="password" class="form-label">Password</label>
-                    <input type="password" id="password" class="form-control" placeholder="Enter your password" required>
-                </div>
-                <button type="submit" class="btn btn-primary" style="width: 100%;">
-                    <i class="fas fa-sign-in-alt"></i>
-                    Sign In
-                </button>
-            </form>
-            <div id="loginError" class="alert alert-error hidden"></div>
-        </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required>
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+        </form>
+        <div id="loginError" class="alert alert-error hidden"></div>
     </div>
 
     <!-- Admin Panel -->
-    <div id="adminPanel" class="app-container hidden">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <i class="fas fa-shield-alt"></i>
+    <div id="adminPanel" class="hidden">
+        <div class="container">
+            <div class="header">
+                <h1>LDAS Warranty Admin Panel</h1>
+                <div class="user-info">
+                    <span id="welcomeText">Welcome, Admin</span>
+                    <button class="btn btn-secondary" onclick="logout()">Logout</button>
                 </div>
-                <div class="logo-text">LDAS Admin</div>
             </div>
-            
-            <nav class="nav-menu">
-                <ul>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="switchTab(event, 'customer-search')">
-                            <i class="fas fa-search nav-icon"></i>
-                            <span class="nav-text">Find Customer</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="switchTab(event, 'warranty-numbers')">
-                            <i class="fas fa-ticket-alt nav-icon"></i>
-                            <span class="nav-text">Warranty Numbers</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="switchTab(event, 'registrations')">
-                            <i class="fas fa-users nav-icon"></i>
-                            <span class="nav-text">Registrations</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="switchTab(event, 'claims')">
-                            <i class="fas fa-exclamation-triangle nav-icon"></i>
-                            <span class="nav-text">Claims</span>
-                            <span class="badge" id="claimsBadge">0</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a href="#" class="nav-link" onclick="switchTab(event, 'settings')">
-                            <i class="fas fa-cog nav-icon"></i>
-                            <span class="nav-text">Settings</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-        </aside>
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="header">
-                <div class="header-left">
-                    <button class="sidebar-toggle" onclick="toggleSidebar()">
-                        <i class="fas fa-bars"></i>
-                    </button>
-                    <div class="breadcrumb">
-                        <span id="currentPage">Dashboard</span>
-                    </div>
-                </div>
-                
-                <div class="header-right">
-                    <button class="theme-toggle" onclick="toggleTheme()">
-                        <i class="fas fa-moon" id="themeIcon"></i>
-                    </button>
-                    
-                    <div class="user-menu" onclick="logout()">
-                        <div class="user-avatar">
-                            <i class="fas fa-user"></i>
-                        </div>
-                        <div>
-                            <div style="font-weight: 600; font-size: 14px;" id="welcomeText">Admin</div>
-                            <div style="font-size: 12px; color: var(--text-muted);">Administrator</div>
-                        </div>
-                        <i class="fas fa-sign-out-alt"></i>
-                    </div>
-                </div>
-            </header>
+            <!-- Stats Dashboard -->
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats will be loaded here -->
+            </div>
 
-            <!-- Content Area -->
-            <div class="content">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab(event, 'dashboard')">Dashboard</button>
+                <button class="tab" onclick="switchTab(event, 'customer-search')">🔍 Find Customer</button>
+                <button class="tab" onclick="switchTab(event, 'warranty-numbers')">Warranty Numbers</button>
+                <button class="tab" onclick="switchTab(event, 'registrations')">Registrations</button>
+            </div>
+
+            <div class="tab-content">
                 <!-- Dashboard Tab -->
                 <div id="dashboard" class="tab-pane active">
-                    <div class="page-title">Dashboard</div>
-                    <div class="page-subtitle">Welcome to your warranty management dashboard</div>
-
-                    <!-- Stats Grid -->
-                    <div class="stats-grid" id="statsGrid">
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <div class="stat-icon">
-                                    <i class="fas fa-ticket-alt"></i>
-                                </div>
-                                <div class="stat-trend trend-up">
-                                    <i class="fas fa-arrow-up"></i> 12%
-                                </div>
-                            </div>
-                            <div class="stat-number">1,247</div>
-                            <div class="stat-label">Total Warranty Numbers</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, var(--success-color), #34d399);">
-                                    <i class="fas fa-check-circle"></i>
-                                </div>
-                                <div class="stat-trend trend-up">
-                                    <i class="fas fa-arrow-up"></i> 8%
-                                </div>
-                            </div>
-                            <div class="stat-number">856</div>
-                            <div class="stat-label">Active Warranties</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, var(--warning-color), #fbbf24);">
-                                    <i class="fas fa-exclamation-triangle"></i>
-                                </div>
-                                <div class="stat-trend trend-down">
-                                    <i class="fas fa-arrow-down"></i> 3%
-                                </div>
-                            </div>
-                            <div class="stat-number">23</div>
-                            <div class="stat-label">Pending Claims</div>
-                        </div>
-                        
-                        <div class="stat-card">
-                            <div class="stat-header">
-                                <div class="stat-icon" style="background: linear-gradient(135deg, var(--info-color), #38bdf8);">
-                                    <i class="fas fa-chart-line"></i>
-                                </div>
-                                <div class="stat-trend trend-up">
-                                    <i class="fas fa-arrow-up"></i> 15%
-                                </div>
-                            </div>
-                            <div class="stat-number">47</div>
-                            <div class="stat-label">This Week</div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="card">
-                        <div class="card-header">
-                            <h3 class="card-title">Recent Activity</h3>
-                            <button class="btn btn-sm btn-secondary">
-                                <i class="fas fa-refresh"></i>
-                                Refresh
-                            </button>
-                        </div>
-                        <div class="card-body">
-                            <div id="recentActivity">
-                                <p style="color: var(--text-secondary); text-align: center; padding: 40px;">
-                                    <i class="fas fa-chart-line" style="font-size: 48px; margin-bottom: 16px; display: block; color: var(--primary-color);"></i>
-                                    Dashboard loaded successfully! Use the navigation menu to manage warranty numbers and registrations.
-                                </p>
-                            </div>
-                        </div>
+                    <h3>Recent Activity</h3>
+                    <div id="recentActivity">
+                        <p>Dashboard loaded successfully! Use the tabs above to manage warranty numbers and registrations.</p>
                     </div>
                 </div>
 
                 <!-- Customer Search Tab -->
                 <div id="customer-search" class="tab-pane">
-                    <div class="page-title">Find Customer</div>
-                    <div class="page-subtitle">Search for customer warranty information quickly and efficiently</div>
-
                     <div class="search-container">
                         <div class="search-header">
-                            <i class="fas fa-search search-icon"></i>
-                            <h3 class="search-title">Customer Warranty Lookup</h3>
+                            <h3>🔍 Find Customer for Warranty Claims</h3>
                         </div>
-                        <p style="color: var(--text-secondary); margin-bottom: 20px;">
+                        <p style="color: #64748b; margin-bottom: 20px;">
                             Search by email, name, warranty number, or order ID to quickly find customer warranty information.
                         </p>
                         
                         <div class="search-form">
-                            <div class="form-group">
-                                <label for="searchQuery" class="form-label">Search Query</label>
-                                <input type="text" id="searchQuery" class="form-control" 
+                            <div>
+                                <label for="searchQuery" style="font-weight: 600; margin-bottom: 5px; display: block;">Search Query</label>
+                                <input type="text" id="searchQuery" class="search-input" 
                                        placeholder="Enter email, name, warranty #, or order ID..." 
                                        onkeyup="debounceCustomerSearch()">
                             </div>
-                            <div class="form-group">
-                                <label for="searchType" class="form-label">Search Type</label>
-                                <select id="searchType" class="form-control" onchange="performCustomerSearch()">
+                            <div>
+                                <label for="searchType" style="font-weight: 600; margin-bottom: 5px; display: block;">Search Type</label>
+                                <select id="searchType" class="search-input" onchange="performCustomerSearch()">
                                     <option value="all">All Fields</option>
                                     <option value="email">Email</option>
                                     <option value="name">Name</option>
@@ -998,64 +610,53 @@
                                     <option value="order">Order ID</option>
                                 </select>
                             </div>
-                            <button class="btn btn-primary" onclick="performCustomerSearch()">
-                                <i class="fas fa-search"></i>
-                                Search
+                            <button class="btn btn-primary" onclick="performCustomerSearch()" style="height: 48px;">
+                                🔍 Search
                             </button>
                         </div>
                     </div>
                     
                     <div id="searchResults" class="search-results">
-                        <div class="card">
-                            <div class="card-body text-center" style="padding: 60px;">
-                                <i class="fas fa-search" style="font-size: 48px; color: var(--text-muted); margin-bottom: 20px;"></i>
-                                <h4 style="color: var(--text-primary); margin-bottom: 8px;">Ready to Search</h4>
-                                <p style="color: var(--text-secondary);">Enter a search term above to find customer warranty information</p>
-                            </div>
+                        <div class="no-results">
+                            <i>🔍</i>
+                            <h4>Ready to Search</h4>
+                            <p>Enter a search term above to find customer warranty information</p>
                         </div>
                     </div>
                 </div>
 
                 <!-- Warranty Numbers Tab -->
                 <div id="warranty-numbers" class="tab-pane">
-                    <div class="page-title">Warranty Numbers</div>
-                    <div class="page-subtitle">Manage and track warranty number inventory</div>
-
-                    <div class="flex justify-between items-center mb-20">
-                        <div class="flex gap-10">
-                            <div class="form-group" style="margin: 0;">
-                                <label class="form-label">Product Filter</label>
-                                <select id="productFilter" class="form-control" onchange="loadWarrantyNumbers()">
-                                    <option value="">All Products</option>
-                                    <option value="th11">TH11 Headset</option>
-                                    <option value="g7">G7 Headset</option>
-                                    <option value="g10">G10 Headset</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin: 0;">
-                                <label class="form-label">Status Filter</label>
-                                <select id="statusFilter" class="form-control" onchange="loadWarrantyNumbers()">
-                                    <option value="">All Status</option>
-                                    <option value="false">Available</option>
-                                    <option value="true">Used</option>
-                                </select>
-                            </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Warranty Number Management</h3>
+                        <div>
+                            <button class="btn btn-primary" onclick="openAddWarrantyModal()">Add Single</button>
+                            <a href="bulk-upload.html" class="btn btn-success" style="text-decoration: none;">Bulk Upload</a>
                         </div>
-                        
-                        <div class="flex gap-10">
-                            <button class="btn btn-primary" onclick="openAddWarrantyModal()">
-                                <i class="fas fa-plus"></i>
-                                Add Single
-                            </button>
-                            <a href="bulk-upload.html" class="btn btn-success">
-                                <i class="fas fa-upload"></i>
-                                Bulk Upload
-                            </a>
+                    </div>
+                    
+                    <div class="filters">
+                        <div>
+                            <label>Product:</label>
+                            <select id="productFilter" onchange="loadWarrantyNumbers()">
+                                <option value="">All Products</option>
+                                <option value="th11">TH11 Headset</option>
+                                <option value="g7">G7 Headset</option>
+                                <option value="g10">G10 Headset</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Status:</label>
+                            <select id="statusFilter" onchange="loadWarrantyNumbers()">
+                                <option value="">All</option>
+                                <option value="false">Unused</option>
+                                <option value="true">Used</option>
+                            </select>
                         </div>
                     </div>
 
                     <div class="table-container">
-                        <table class="table" id="warrantyNumbersTable">
+                        <table id="warrantyNumbersTable">
                             <thead>
                                 <tr>
                                     <th>Warranty Number</th>
@@ -1066,274 +667,245 @@
                                 </tr>
                             </thead>
                             <tbody id="warrantyNumbersBody">
-                                <tr>
-                                    <td colspan="5" class="text-center" style="padding: 40px;">
-                                        <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: var(--primary-color);"></i>
-                                        <div style="margin-top: 12px; color: var(--text-secondary);">Loading warranty numbers...</div>
-                                    </td>
-                                </tr>
+                                <tr><td colspan="5" style="text-align: center;">Loading warranty numbers...</td></tr>
                             </tbody>
                         </table>
                     </div>
                     <div id="warrantyPagination" class="pagination"></div>
                 </div>
 
-                <!-- Registrations Tab -->
+                <!-- Enhanced Registrations Tab -->
                 <div id="registrations" class="tab-pane">
-                    <div class="page-title">Warranty Registrations</div>
-                    <div class="page-subtitle">View and manage all warranty registrations</div>
-
-                    <div class="flex justify-between items-center mb-20">
-                        <div class="flex gap-10">
-                            <div class="form-group" style="margin: 0;">
-                                <label class="form-label">Product Filter</label>
-                                <select id="regProductFilter" class="form-control" onchange="loadRegistrations()">
-                                    <option value="">All Products</option>
-                                    <option value="th11">TH11 Headset</option>
-                                    <option value="g7">G7 Headset</option>
-                                    <option value="g10">G10 Headset</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin: 0;">
-                                <label class="form-label">Status Filter</label>
-                                <select id="regStatusFilter" class="form-control" onchange="loadRegistrations()">
-                                    <option value="">All Status</option>
-                                    <option value="active">Active</option>
-                                    <option value="expired">Expired</option>
-                                    <option value="claimed">Claimed</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin: 0;">
-                                <label class="form-label">Email Search</label>
-                                <input type="text" id="emailFilter" class="form-control" placeholder="Search by email" onkeyup="debounceLoadRegistrations()">
-                            </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                        <h3>Warranty Registrations</h3>
+                        <button class="btn btn-success" onclick="exportRegistrations()">Export CSV</button>
+                    </div>
+                    
+                    <div class="filters">
+                        <div>
+                            <label>Product:</label>
+                            <select id="regProductFilter" onchange="loadRegistrations()">
+                                <option value="">All Products</option>
+                                <option value="th11">TH11 Headset</option>
+                                <option value="g7">G7 Headset</option>
+                                <option value="g10">G10 Headset</option>
+                            </select>
                         </div>
-                        
-                        <button class="btn btn-success" onclick="exportRegistrations()">
-                            <i class="fas fa-download"></i>
-                            Export CSV
-                        </button>
+                        <div>
+                            <label>Status:</label>
+                            <select id="regStatusFilter" onchange="loadRegistrations()">
+                                <option value="">All</option>
+                                <option value="active">Active</option>
+                                <option value="expired">Expired</option>
+                                <option value="claimed">Claimed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Email:</label>
+                            <input type="text" id="emailFilter" placeholder="Search by email" onkeyup="debounceLoadRegistrations()">
+                        </div>
                     </div>
 
                     <div class="table-container">
-                        <table class="table" id="registrationsTable">
+                        <table id="registrationsTable">
                             <thead>
                                 <tr>
-                                    <th>Customer</th>
+                                    <th>Name</th>
                                     <th>Email</th>
                                     <th>Product</th>
                                     <th>Warranty #</th>
                                     <th>Purchase Date</th>
                                     <th>Status</th>
                                     <th>Registered</th>
-                                    <th style="width: 250px;">Actions</th>
+                                    <th class="actions-column">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="registrationsBody">
-                                <tr>
-                                    <td colspan="8" class="text-center" style="padding: 40px;">
-                                        <i class="fas fa-spinner fa-spin" style="font-size: 24px; color: var(--primary-color);"></i>
-                                        <div style="margin-top: 12px; color: var(--text-secondary);">Loading registrations...</div>
-                                    </td>
-                                </tr>
+                                <tr><td colspan="8" style="text-align: center;">Loading registrations...</td></tr>
                             </tbody>
                         </table>
                     </div>
                     <div id="registrationsPagination" class="pagination"></div>
                 </div>
-
-                <!-- Claims Tab -->
-                <div id="claims" class="tab-pane">
-                    <div class="page-title">Warranty Claims</div>
-                    <div class="page-subtitle">Manage and process warranty claims</div>
-
-                    <div class="flex justify-between items-center mb-20">
-                        <div class="flex gap-10">
-                            <div class="form-group" style="margin: 0;">
-                                <label class="form-label">Status Filter</label>
-                                <select id="claimStatusFilter" class="form-control">
-                                    <option value="">All Status</option>
-                                    <option value="submitted">Submitted</option>
-                                    <option value="under-review">Under Review</option>
-                                    <option value="approved">Approved</option>
-                                    <option value="denied">Denied</option>
-                                    <option value="completed">Completed</option>
-                                </select>
-                            </div>
-                            <div class="form-group" style="margin: 0;">
-                                <label class="form-label">Priority Filter</label>
-                                <select id="claimPriorityFilter" class="form-control">
-                                    <option value="">All Priorities</option>
-                                    <option value="urgent">Urgent</option>
-                                    <option value="high">High</option>
-                                    <option value="standard">Standard</option>
-                                    <option value="low">Low</option>
-                                </select>
-                            </div>
-                        </div>
-                        
-                        <button class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            New Claim
-                        </button>
-                    </div>
-
-                    <div class="table-container">
-                        <table class="table">
-                            <thead>
-                                <tr>
-                                    <th>Claim #</th>
-                                    <th>Customer</th>
-                                    <th>Product</th>
-                                    <th>Issue Type</th>
-                                    <th>Priority</th>
-                                    <th>Status</th>
-                                    <th>Submitted</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td colspan="8" class="text-center" style="padding: 40px;">
-                                        <i class="fas fa-clipboard-list" style="font-size: 48px; color: var(--text-muted); margin-bottom: 20px;"></i>
-                                        <div style="color: var(--text-secondary);">No claims to display</div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Settings Tab -->
-                <div id="settings" class="tab-pane">
-                    <div class="page-title">Settings</div>
-                    <div class="page-subtitle">Configure system settings and preferences</div>
-
-                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px;">
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fas fa-palette" style="margin-right: 8px; color: var(--primary-color);"></i>
-                                    Appearance
-                                </h3>
-                            </div>
-                            <div class="card-body">
-                                <div class="form-group">
-                                    <label class="form-label">Theme Mode</label>
-                                    <div style="display: flex; gap: 12px;">
-                                        <button class="btn btn-secondary" onclick="setTheme('light')" id="lightThemeBtn">
-                                            <i class="fas fa-sun"></i>
-                                            Light
-                                        </button>
-                                        <button class="btn btn-secondary" onclick="setTheme('dark')" id="darkThemeBtn">
-                                            <i class="fas fa-moon"></i>
-                                            Dark
-                                        </button>
-                                        <button class="btn btn-secondary" onclick="setTheme('auto')" id="autoThemeBtn">
-                                            <i class="fas fa-magic"></i>
-                                            Auto
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fas fa-envelope" style="margin-right: 8px; color: var(--primary-color);"></i>
-                                    Email Service
-                                </h3>
-                            </div>
-                            <div class="card-body">
-                                <button class="btn btn-primary" onclick="testEmailConnection()">
-                                    <i class="fas fa-envelope-open"></i>
-                                    Test Email Connection
-                                </button>
-                                <div id="emailTestResult" class="mt-20"></div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fas fa-store" style="margin-right: 8px; color: var(--primary-color);"></i>
-                                    Shopify Integration
-                                </h3>
-                            </div>
-                            <div class="card-body">
-                                <button class="btn btn-primary" onclick="testShopifyConnection()">
-                                    <i class="fas fa-shopping-cart"></i>
-                                    Test Shopify Connection
-                                </button>
-                                <div id="shopifyTestResult" class="mt-20"></div>
-                            </div>
-                        </div>
-
-                        <div class="card">
-                            <div class="card-header">
-                                <h3 class="card-title">
-                                    <i class="fas fa-database" style="margin-right: 8px; color: var(--primary-color);"></i>
-                                    System Info
-                                </h3>
-                            </div>
-                            <div class="card-body">
-                                <div style="color: var(--text-secondary); line-height: 1.8;">
-                                    <div><strong>Version:</strong> 2.2.0</div>
-                                    <div><strong>Environment:</strong> Production</div>
-                                    <div><strong>Last Updated:</strong> Today</div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
             </div>
-        </main>
+        </div>
     </div>
 
     <!-- Add Warranty Number Modal -->
     <div id="addWarrantyModal" class="modal">
         <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title">Add Warranty Number</h3>
-                <button class="close" onclick="closeModal('addWarrantyModal')">
-                    <i class="fas fa-times"></i>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form id="addWarrantyForm">
+            <span class="close" onclick="closeModal('addWarrantyModal')">&times;</span>
+            <h3>Add Warranty Number</h3>
+            <form id="addWarrantyForm">
+                <div class="form-group">
+                    <label for="warrantyNumber">Warranty Number:</label>
+                    <input type="text" id="warrantyNumber" pattern="[0-9]{4,5}" required>
+                    <small>4-5 digits only</small>
+                </div>
+                <div class="form-group">
+                    <label for="productId">Product:</label>
+                    <select id="productId" required>
+                        <option value="">Select Product</option>
+                        <option value="th11">TH11 Headset</option>
+                        <option value="g7">G7 Headset</option>
+                        <option value="g10">G10 Headset</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="productName">Product Name:</label>
+                    <input type="text" id="productName" readonly>
+                </div>
+                <button type="submit" class="btn btn-primary">Add Warranty Number</button>
+            </form>
+            <div id="addWarrantyError" class="alert alert-error hidden"></div>
+            <div id="addWarrantySuccess" class="alert alert-success hidden"></div>
+        </div>
+    </div>
+
+    <!-- Edit Registration Modal -->
+    <div id="editRegistrationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editRegistrationModal')">&times;</span>
+            <h3>Edit Warranty Registration</h3>
+            <form id="editRegistrationForm">
+                <input type="hidden" id="editRegistrationId">
+                
+                <div class="form-row">
                     <div class="form-group">
-                        <label for="warrantyNumber" class="form-label">Warranty Number</label>
-                        <input type="text" id="warrantyNumber" class="form-control" pattern="[0-9]{4,5}" placeholder="Enter 4-5 digit number" required>
-                        <small style="color: var(--text-muted);">4-5 digits only</small>
+                        <label for="editFirstName">First Name:</label>
+                        <input type="text" id="editFirstName" required>
                     </div>
                     <div class="form-group">
-                        <label for="productId" class="form-label">Product</label>
-                        <select id="productId" class="form-control" required>
-                            <option value="">Select Product</option>
+                        <label for="editLastName">Last Name:</label>
+                        <input type="text" id="editLastName" required>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editProduct">Product:</label>
+                        <select id="editProduct" required>
                             <option value="th11">TH11 Headset</option>
                             <option value="g7">G7 Headset</option>
                             <option value="g10">G10 Headset</option>
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="productName" class="form-label">Product Name</label>
-                        <input type="text" id="productName" class="form-control" readonly>
+                        <label for="editSource">Purchase Source:</label>
+                        <select id="editSource" required>
+                            <option value="Amazon.ca">Amazon.ca</option>
+                            <option value="Best Buy">Best Buy</option>
+                            <option value="LDAS.ca">LDAS.ca</option>
+                            <option value="Walmart">Walmart</option>
+                        </select>
                     </div>
-                    <div class="flex gap-10">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-plus"></i>
-                            Add Warranty Number
-                        </button>
-                        <button type="button" class="btn btn-secondary" onclick="closeModal('addWarrantyModal')">
-                            <i class="fas fa-times"></i>
-                            Cancel
-                        </button>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editOrderId">Order ID:</label>
+                        <input type="text" id="editOrderId" required>
                     </div>
-                </form>
-                <div id="addWarrantyError" class="alert alert-error hidden"></div>
-                <div id="addWarrantySuccess" class="alert alert-success hidden"></div>
+                    <div class="form-group">
+                        <label for="editWarrantyNumber">Warranty Number:</label>
+                        <input type="text" id="editWarrantyNumber" pattern="[0-9]{4,5}" required readonly>
+                        <small>Warranty number cannot be changed</small>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editPurchaseDate">Purchase Date:</label>
+                    <input type="date" id="editPurchaseDate" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="editStatus">Status:</label>
+                    <select id="editStatus" required>
+                        <option value="active">Active</option>
+                        <option value="expired">Expired</option>
+                        <option value="claimed">Claimed</option>
+                    </select>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Update Registration</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editRegistrationModal')">Cancel</button>
+                </div>
+            </form>
+            <div id="editRegistrationError" class="alert alert-error hidden"></div>
+            <div id="editRegistrationSuccess" class="alert alert-success hidden"></div>
+        </div>
+    </div>
+
+    <!-- Delete Confirmation Modal -->
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('deleteConfirmModal')">&times;</span>
+            <h3>Confirm Deletion</h3>
+            <div class="confirmation-dialog">
+                <h4>⚠️ Are you sure?</h4>
+                <p id="deleteConfirmText">This action cannot be undone.</p>
+                <div class="button-group">
+                    <button id="confirmDeleteBtn" class="btn btn-danger">Yes, Delete</button>
+                    <button class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Cancel</button>
+                </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Unlink Confirmation Modal -->
+    <div id="unlinkConfirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('unlinkConfirmModal')">&times;</span>
+            <h3>Unlink Warranty Number</h3>
+            <div class="confirmation-dialog">
+                <h4>🔗 Unlink Warranty Number?</h4>
+                <p id="unlinkConfirmText">This will make the warranty number available for reuse.</p>
+                <div class="button-group">
+                    <button id="confirmUnlinkBtn" class="btn btn-warning">Yes, Unlink</button>
+                    <button class="btn btn-secondary" onclick="closeModal('unlinkConfirmModal')">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Process Claim Modal -->
+    <div id="processClaimModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('processClaimModal')">&times;</span>
+            <h3>Process Warranty Claim</h3>
+            <div id="claimCustomerInfo"></div>
+            <form id="processClaimForm">
+                <input type="hidden" id="claimRegistrationId">
+                
+                <div class="form-group">
+                    <label for="claimType">Claim Type:</label>
+                    <select id="claimType" required>
+                        <option value="">Select Claim Type</option>
+                        <option value="replacement">Product Replacement</option>
+                        <option value="repair">Product Repair</option>
+                        <option value="refund">Refund Request</option>
+                        <option value="technical">Technical Support</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="claimNotes">Claim Notes:</label>
+                    <textarea id="claimNotes" rows="4" placeholder="Enter details about the warranty claim..."></textarea>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn btn-primary">Process Claim</button>
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('processClaimModal')">Cancel</button>
+                </div>
+            </form>
+            <div id="claimError" class="alert alert-error hidden"></div>
+            <div id="claimSuccess" class="alert alert-success hidden"></div>
         </div>
     </div>
 
@@ -1347,65 +919,8 @@
         let currentEditingId = null;
         let currentActionType = null;
 
-        // Theme Management
-        function initializeTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            setTheme(savedTheme);
-        }
-
-        function setTheme(theme) {
-            const html = document.documentElement;
-            const themeIcon = document.getElementById('themeIcon');
-            
-            if (theme === 'auto') {
-                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                theme = prefersDark ? 'dark' : 'light';
-            }
-            
-            html.setAttribute('data-theme', theme);
-            localStorage.setItem('theme', theme);
-            
-            if (themeIcon) {
-                themeIcon.className = theme === 'dark' ? 'fas fa-sun' : 'fas fa-moon';
-            }
-
-            // Update theme buttons
-            updateThemeButtons(theme);
-        }
-
-        function updateThemeButtons(currentTheme) {
-            const buttons = ['lightThemeBtn', 'darkThemeBtn', 'autoThemeBtn'];
-            buttons.forEach(btnId => {
-                const btn = document.getElementById(btnId);
-                if (btn) {
-                    btn.classList.remove('btn-primary');
-                    btn.classList.add('btn-secondary');
-                }
-            });
-
-            const activeBtn = document.getElementById(currentTheme + 'ThemeBtn');
-            if (activeBtn) {
-                activeBtn.classList.remove('btn-secondary');
-                activeBtn.classList.add('btn-primary');
-            }
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            setTheme(newTheme);
-        }
-
-        // Sidebar Management
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            sidebar.classList.toggle('collapsed');
-        }
-
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
-            initializeTheme();
-            
             if (currentToken) {
                 showAdminPanel();
                 loadDashboard();
@@ -1443,7 +958,7 @@
                 if (response.ok) {
                     currentToken = data.token;
                     localStorage.setItem('adminToken', currentToken);
-                    document.getElementById('welcomeText').textContent = data.admin.username;
+                    document.getElementById('welcomeText').textContent = `Welcome, ${data.admin.username}`;
                     showAdminPanel();
                     loadDashboard();
                 } else {
@@ -1503,7 +1018,6 @@
                 if (response.ok) {
                     const stats = await response.json();
                     displayStats(stats);
-                    updateClaimsBadge(stats.claimsOverview?.needsAttention || 0);
                 } else {
                     console.error('Failed to load stats');
                 }
@@ -1516,63 +1030,23 @@
             const statsGrid = document.getElementById('statsGrid');
             statsGrid.innerHTML = `
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon">
-                            <i class="fas fa-ticket-alt"></i>
-                        </div>
-                        <div class="stat-trend trend-up">
-                            <i class="fas fa-arrow-up"></i> 12%
-                        </div>
-                    </div>
-                    <div class="stat-number">${stats.totalWarrantyNumbers || 0}</div>
+                    <div class="stat-number" style="color: #10b981;">${stats.totalWarrantyNumbers || 0}</div>
                     <div class="stat-label">Total Warranty Numbers</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, var(--secondary-color), #6b7280);">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
-                        <div class="stat-trend trend-up">
-                            <i class="fas fa-arrow-up"></i> 8%
-                        </div>
-                    </div>
-                    <div class="stat-number">${stats.availableWarrantyNumbers || 0}</div>
+                    <div class="stat-number" style="color: #6b7280;">${stats.availableWarrantyNumbers || 0}</div>
                     <div class="stat-label">Available Numbers</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, var(--accent-color), #3b82f6);">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stat-trend trend-up">
-                            <i class="fas fa-arrow-up"></i> 15%
-                        </div>
-                    </div>
-                    <div class="stat-number">${stats.totalRegistrations || 0}</div>
+                    <div class="stat-number" style="color: #3b82f6;">${stats.totalRegistrations || 0}</div>
                     <div class="stat-label">Total Registrations</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, var(--success-color), #22c55e);">
-                            <i class="fas fa-shield-alt"></i>
-                        </div>
-                        <div class="stat-trend trend-up">
-                            <i class="fas fa-arrow-up"></i> 10%
-                        </div>
-                    </div>
-                    <div class="stat-number">${stats.activeWarranties || 0}</div>
+                    <div class="stat-number" style="color: #22c55e;">${stats.activeWarranties || 0}</div>
                     <div class="stat-label">Active Warranties</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <div class="stat-icon" style="background: linear-gradient(135deg, var(--warning-color), #f59e0b);">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="stat-trend trend-up">
-                            <i class="fas fa-arrow-up"></i> 5%
-                        </div>
-                    </div>
-                    <div class="stat-number">${stats.recentRegistrations || 0}</div>
+                    <div class="stat-number" style="color: #f59e0b;">${stats.recentRegistrations || 0}</div>
                     <div class="stat-label">Last 7 Days</div>
                 </div>
             `;
@@ -1660,12 +1134,10 @@
             
             if (registrations.length === 0) {
                 resultsContainer.innerHTML = `
-                    <div class="card">
-                        <div class="card-body text-center" style="padding: 60px;">
-                            <i class="fas fa-search" style="font-size: 48px; color: var(--text-muted); margin-bottom: 20px;"></i>
-                            <h4 style="color: var(--text-primary); margin-bottom: 8px;">No Results Found</h4>
-                            <p style="color: var(--text-secondary);">No warranty registrations found for "${query}"</p>
-                        </div>
+                    <div class="no-results">
+                        <i>📭</i>
+                        <h4>No Results Found</h4>
+                        <p>No warranty registrations found for "${query}"</p>
                     </div>
                 `;
                 return;
@@ -1678,62 +1150,51 @@
                 const status = isExpired ? 'expired' : reg.status;
                 
                 return `
-                    <div class="card" style="margin-bottom: 20px;">
-                        <div class="card-body">
-                            <div class="flex justify-between items-center" style="margin-bottom: 16px;">
-                                <div>
-                                    <h4 style="color: var(--text-primary); margin-bottom: 4px;">${reg.fullName}</h4>
-                                    <p style="color: var(--text-secondary); margin: 0;">
-                                        <i class="fas fa-envelope" style="margin-right: 8px;"></i>
-                                        ${reg.email}
-                                    </p>
-                                </div>
+                    <div class="customer-card">
+                        <div class="customer-header">
+                            <div class="customer-info">
+                                <h4>${reg.fullName}</h4>
+                                <p>✉️ ${reg.email}</p>
+                            </div>
+                            <div>
                                 <span class="status-badge status-${status}">
                                     ${status.charAt(0).toUpperCase() + status.slice(1)}
                                 </span>
                             </div>
-                            
-                            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px;">
-                                <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px;">
-                                    <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Product</div>
-                                    <div style="color: var(--text-primary); font-weight: 600;">${reg.product}</div>
-                                </div>
-                                <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px;">
-                                    <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Warranty Number</div>
-                                    <div style="color: var(--text-primary); font-weight: 600;">${reg.warrantyNumber || 'N/A'}</div>
-                                </div>
-                                <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px;">
-                                    <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Purchase Date</div>
-                                    <div style="color: var(--text-primary); font-weight: 600;">${new Date(reg.purchaseDate).toLocaleDateString()}</div>
-                                </div>
-                                <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px;">
-                                    <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Order ID</div>
-                                    <div style="color: var(--text-primary); font-weight: 600;">${reg.orderId}</div>
-                                </div>
-                                <div style="background: var(--bg-tertiary); padding: 12px; border-radius: 8px;">
-                                    <div style="color: var(--text-muted); font-size: 12px; text-transform: uppercase; margin-bottom: 4px;">Warranty Expires</div>
-                                    <div style="color: var(--text-primary); font-weight: 600;">${warrantyEndDate.toLocaleDateString()} ${isExpired ? '(Expired)' : `(${daysRemaining} days)`}</div>
-                                </div>
+                        </div>
+                        
+                        <div class="warranty-info">
+                            <div class="warranty-detail">
+                                <strong>Product</strong>
+                                <span>${reg.product}</span>
                             </div>
-                            
-                            <div class="flex gap-10" style="flex-wrap: wrap;">
-                                <button class="btn btn-primary btn-sm" onclick="editRegistration('${reg._id}')">
-                                    <i class="fas fa-edit"></i>
-                                    Edit
-                                </button>
-                                <button class="btn btn-info btn-sm" onclick="processWarrantyClaim('${reg._id}')">
-                                    <i class="fas fa-tools"></i>
-                                    Process Claim
-                                </button>
-                                ${reg.warrantyNumber ? `<button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">
-                                    <i class="fas fa-unlink"></i>
-                                    Unlink
-                                </button>` : ''}
-                                <button class="btn btn-danger btn-sm" onclick="deleteRegistration('${reg._id}', '${reg.fullName}')">
-                                    <i class="fas fa-trash"></i>
-                                    Delete
-                                </button>
+                            <div class="warranty-detail">
+                                <strong>Warranty Number</strong>
+                                <span>${reg.warrantyNumber || 'N/A'}</span>
                             </div>
+                            <div class="warranty-detail">
+                                <strong>Purchase Date</strong>
+                                <span>${new Date(reg.purchaseDate).toLocaleDateString()}</span>
+                            </div>
+                            <div class="warranty-detail">
+                                <strong>Purchase Source</strong>
+                                <span>${reg.source}</span>
+                            </div>
+                            <div class="warranty-detail">
+                                <strong>Order ID</strong>
+                                <span>${reg.orderId}</span>
+                            </div>
+                            <div class="warranty-detail">
+                                <strong>Warranty Expires</strong>
+                                <span>${warrantyEndDate.toLocaleDateString()} ${isExpired ? '(Expired)' : `(${daysRemaining} days)`}</span>
+                            </div>
+                        </div>
+                        
+                        <div style="margin-top: 15px; display: flex; gap: 10px; flex-wrap: wrap;">
+                            <button class="btn btn-primary btn-sm" onclick="editRegistration('${reg._id}')">✏️ Edit</button>
+                            <button class="btn btn-info btn-sm" onclick="processWarrantyClaim('${reg._id}')">🛠️ Process Claim</button>
+                            ${reg.warrantyNumber ? `<button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">🔗 Unlink</button>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="deleteRegistration('${reg._id}', '${reg.fullName}')">🗑️ Delete</button>
                         </div>
                     </div>
                 `;
@@ -1741,20 +1202,81 @@
 
             resultsContainer.innerHTML = `
                 <div style="margin-bottom: 20px;">
-                    <div class="flex justify-between items-center">
-                        <div>
-                            <h4 style="color: var(--text-primary); margin-bottom: 4px;">Search Results</h4>
-                            <p style="color: var(--text-secondary); margin: 0;">Found ${registrations.length} warranty registration(s) for "${query}"</p>
-                        </div>
-                        <button class="btn btn-secondary btn-sm" onclick="resetSearch()">
-                            <i class="fas fa-times"></i>
-                            Clear Search
-                        </button>
-                    </div>
+                    <h4>Search Results (${registrations.length} found)</h4>
+                    <p style="color: #64748b;">Found ${registrations.length} warranty registration(s) for "${query}"</p>
                 </div>
                 ${resultsHTML}
             `;
         }
+
+        // Process Warranty Claim
+        function processWarrantyClaim(registrationId) {
+            currentEditingId = registrationId;
+            
+            // Get registration details for the claim
+            fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                headers: { 'Authorization': `Bearer ${currentToken}` }
+            })
+            .then(response => response.json())
+            .then(registration => {
+                const claimInfo = document.getElementById('claimCustomerInfo');
+                claimInfo.innerHTML = `
+                    <div class="alert alert-info">
+                        <h4>📋 Warranty Claim for ${registration.fullName}</h4>
+                        <p><strong>Product:</strong> ${registration.product}</p>
+                        <p><strong>Warranty #:</strong> ${registration.warrantyNumber}</p>
+                        <p><strong>Purchase Date:</strong> ${new Date(registration.purchaseDate).toLocaleDateString()}</p>
+                        <p><strong>Email:</strong> ${registration.email}</p>
+                    </div>
+                `;
+                
+                document.getElementById('claimRegistrationId').value = registrationId;
+                document.getElementById('processClaimModal').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error loading registration for claim:', error);
+                alert('Failed to load registration details');
+            });
+        }
+
+        document.getElementById('processClaimForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const registrationId = document.getElementById('claimRegistrationId').value;
+            const claimType = document.getElementById('claimType').value;
+            const claimNotes = document.getElementById('claimNotes').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'claimed',
+                        claimType: claimType,
+                        claimNotes: claimNotes,
+                        claimDate: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    showSuccess('claimSuccess', 'Warranty claim processed successfully!');
+                    setTimeout(() => {
+                        closeModal('processClaimModal');
+                        performCustomerSearch(); // Refresh search results
+                        loadDashboard(); // Refresh stats
+                    }, 1500);
+                } else {
+                    const data = await response.json();
+                    showError('claimError', data.error || 'Failed to process claim');
+                }
+            } catch (error) {
+                console.error('Error processing claim:', error);
+                showError('claimError', 'Failed to process warranty claim');
+            }
+        });
 
         // Warranty Numbers Management
         async function loadWarrantyNumbers(page = 1) {
@@ -1773,6 +1295,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     displayWarrantyNumbers(data.warrantyNumbers);
+                    displayPagination('warrantyPagination', data.pagination, loadWarrantyNumbers);
                 } else {
                     console.error('Failed to load warranty numbers');
                 }
@@ -1784,20 +1307,13 @@
         function displayWarrantyNumbers(warrantyNumbers) {
             const tbody = document.getElementById('warrantyNumbersBody');
             if (warrantyNumbers.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="5" class="text-center" style="padding: 40px;">
-                            <i class="fas fa-ticket-alt" style="font-size: 48px; color: var(--text-muted); margin-bottom: 20px;"></i>
-                            <div style="color: var(--text-secondary);">No warranty numbers found</div>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center;">No warranty numbers found</td></tr>';
                 return;
             }
             
             tbody.innerHTML = warrantyNumbers.map(wn => `
                 <tr>
-                    <td style="font-weight: 600; color: var(--text-primary);">${wn.warrantyNumber}</td>
+                    <td>${wn.warrantyNumber}</td>
                     <td>${wn.productName}</td>
                     <td><span class="status-badge ${wn.isUsed ? 'status-used' : 'status-unused'}">
                         ${wn.isUsed ? 'Used' : 'Available'}
@@ -1808,7 +1324,7 @@
             `).join('');
         }
 
-        // Registrations Management
+        // Enhanced Registrations Management
         async function loadRegistrations(page = 1) {
             try {
                 const productFilter = document.getElementById('regProductFilter').value;
@@ -1827,6 +1343,7 @@
                 if (response.ok) {
                     const data = await response.json();
                     displayRegistrations(data.registrations);
+                    displayPagination('registrationsPagination', data.pagination, loadRegistrations);
                 } else {
                     console.error('Failed to load registrations');
                 }
@@ -1838,14 +1355,7 @@
         function displayRegistrations(registrations) {
             const tbody = document.getElementById('registrationsBody');
             if (registrations.length === 0) {
-                tbody.innerHTML = `
-                    <tr>
-                        <td colspan="8" class="text-center" style="padding: 40px;">
-                            <i class="fas fa-users" style="font-size: 48px; color: var(--text-muted); margin-bottom: 20px;"></i>
-                            <div style="color: var(--text-secondary);">No registrations found</div>
-                        </td>
-                    </tr>
-                `;
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center;">No registrations found</td></tr>';
                 return;
             }
             
@@ -1856,34 +1366,217 @@
                 
                 return `
                     <tr>
-                        <td style="font-weight: 600; color: var(--text-primary);">${reg.fullName}</td>
+                        <td>${reg.fullName}</td>
                         <td>${reg.email}</td>
                         <td>${reg.product}</td>
-                        <td style="font-weight: 600;">${reg.warrantyNumber || 'N/A'}</td>
+                        <td>${reg.warrantyNumber || 'N/A'}</td>
                         <td>${new Date(reg.purchaseDate).toLocaleDateString()}</td>
                         <td><span class="status-badge status-${status}">
                             ${status.charAt(0).toUpperCase() + status.slice(1)}
                         </span></td>
                         <td>${new Date(reg.createdAt).toLocaleDateString()}</td>
-                        <td>
-                            <div class="flex gap-10" style="flex-wrap: wrap;">
-                                <button class="btn btn-primary btn-sm" onclick="editRegistration('${reg._id}')">
-                                    <i class="fas fa-edit"></i>
-                                </button>
-                                <button class="btn btn-info btn-sm" onclick="processWarrantyClaim('${reg._id}')">
-                                    <i class="fas fa-tools"></i>
-                                </button>
-                                ${reg.warrantyNumber ? `<button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">
-                                    <i class="fas fa-unlink"></i>
-                                </button>` : ''}
-                                <button class="btn btn-danger btn-sm" onclick="deleteRegistration('${reg._id}', '${reg.fullName}')">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
+                        <td class="actions-column">
+                            <button class="btn btn-primary btn-sm" onclick="editRegistration('${reg._id}')">Edit</button>
+                            <button class="btn btn-info btn-sm" onclick="processWarrantyClaim('${reg._id}')">Claim</button>
+                            ${reg.warrantyNumber ? `<button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">Unlink</button>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="deleteRegistration('${reg._id}', '${reg.fullName}')">Delete</button>
                         </td>
                     </tr>
                 `;
             }).join('');
+        }
+
+        // Edit Registration Functions
+        async function editRegistration(registrationId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const registration = await response.json();
+                    populateEditForm(registration);
+                    document.getElementById('editRegistrationModal').style.display = 'block';
+                } else {
+                    alert('Failed to load registration details');
+                }
+            } catch (error) {
+                console.error('Error loading registration:', error);
+                alert('Failed to load registration details');
+            }
+        }
+
+        function populateEditForm(registration) {
+            document.getElementById('editRegistrationId').value = registration._id;
+            document.getElementById('editFirstName').value = registration.firstName;
+            document.getElementById('editLastName').value = registration.lastName;
+            document.getElementById('editEmail').value = registration.email;
+            document.getElementById('editProduct').value = registration.productId;
+            document.getElementById('editSource').value = registration.source;
+            document.getElementById('editOrderId').value = registration.orderId;
+            document.getElementById('editWarrantyNumber').value = registration.warrantyNumber || '';
+            document.getElementById('editPurchaseDate').value = registration.purchaseDate.split('T')[0];
+            document.getElementById('editStatus').value = registration.status;
+        }
+
+        document.getElementById('editRegistrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const registrationId = document.getElementById('editRegistrationId').value;
+            const updatedData = {
+                firstName: document.getElementById('editFirstName').value.trim(),
+                lastName: document.getElementById('editLastName').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                productId: document.getElementById('editProduct').value,
+                source: document.getElementById('editSource').value,
+                orderId: document.getElementById('editOrderId').value.trim(),
+                purchaseDate: document.getElementById('editPurchaseDate').value,
+                status: document.getElementById('editStatus').value
+            };
+
+            // Update full name
+            updatedData.fullName = `${updatedData.firstName} ${updatedData.lastName}`;
+            
+            // Update product name based on productId
+            const productNames = {
+                'th11': 'LDAS TH11 Headset',
+                'g7': 'LDAS G7 Headset',
+                'g10': 'LDAS G10 Headset'
+            };
+            updatedData.product = productNames[updatedData.productId];
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('editRegistrationSuccess', 'Registration updated successfully!');
+                    setTimeout(() => {
+                        closeModal('editRegistrationModal');
+                        loadRegistrations();
+                        loadDashboard(); // Refresh stats
+                    }, 1500);
+                } else {
+                    showError('editRegistrationError', data.error || 'Failed to update registration');
+                }
+            } catch (error) {
+                console.error('Error updating registration:', error);
+                showError('editRegistrationError', 'Failed to update registration');
+            }
+        });
+
+        // Delete Registration Functions
+        function deleteRegistration(registrationId, customerName) {
+            currentEditingId = registrationId;
+            currentActionType = 'delete';
+            document.getElementById('deleteConfirmText').textContent = 
+                `Are you sure you want to delete the warranty registration for ${customerName}? This action cannot be undone and will make the warranty number available for reuse.`;
+            document.getElementById('deleteConfirmModal').style.display = 'block';
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+            if (currentActionType !== 'delete' || !currentEditingId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${currentEditingId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeModal('deleteConfirmModal');
+                    alert('Registration deleted successfully!');
+                    loadRegistrations();
+                    performCustomerSearch(); // Refresh search results if on search tab
+                    loadDashboard(); // Refresh stats
+                } else {
+                    alert(data.error || 'Failed to delete registration');
+                }
+            } catch (error) {
+                console.error('Error deleting registration:', error);
+                alert('Failed to delete registration');
+            } finally {
+                currentEditingId = null;
+                currentActionType = null;
+            }
+        });
+
+        // Unlink Warranty Functions
+        function unlinkWarranty(registrationId, warrantyNumber) {
+            currentEditingId = registrationId;
+            currentActionType = 'unlink';
+            document.getElementById('unlinkConfirmText').textContent = 
+                `Are you sure you want to unlink warranty number ${warrantyNumber}? This will remove the registration and make the warranty number available for reuse by another customer.`;
+            document.getElementById('unlinkConfirmModal').style.display = 'block';
+        }
+
+        document.getElementById('confirmUnlinkBtn').addEventListener('click', async function() {
+            if (currentActionType !== 'unlink' || !currentEditingId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${currentEditingId}/unlink`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeModal('unlinkConfirmModal');
+                    alert('Warranty number unlinked successfully!');
+                    loadRegistrations();
+                    loadWarrantyNumbers(); // Refresh warranty numbers to show as available
+                    performCustomerSearch(); // Refresh search results if on search tab
+                    loadDashboard(); // Refresh stats
+                } else {
+                    alert(data.error || 'Failed to unlink warranty number');
+                }
+            } catch (error) {
+                console.error('Error unlinking warranty:', error);
+                alert('Failed to unlink warranty number');
+            } finally {
+                currentEditingId = null;
+                currentActionType = null;
+            }
+        });
+
+        // Pagination
+        function displayPagination(containerId, pagination, loadFunction) {
+            const container = document.getElementById(containerId);
+            if (pagination.pages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+            
+            if (pagination.page > 1) {
+                paginationHTML += `<button onclick="${loadFunction.name}(${pagination.page - 1})">Previous</button>`;
+            }
+
+            for (let i = 1; i <= pagination.pages; i++) {
+                if (i === pagination.page) {
+                    paginationHTML += `<button class="active">${i}</button>`;
+                } else {
+                    paginationHTML += `<button onclick="${loadFunction.name}(${i})">${i}</button>`;
+                }
+            }
+
+            if (pagination.page < pagination.pages) {
+                paginationHTML += `<button onclick="${loadFunction.name}(${pagination.page + 1})">Next</button>`;
+            }
+
+            container.innerHTML = paginationHTML;
         }
 
         // Modal Management
@@ -1893,27 +1586,30 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
-        }
-
-        // Product name mapping
-        function setupProductNameMapping() {
-            const productSelect = document.getElementById('productId');
-            const productNameInput = document.getElementById('productName');
             
-            const productNames = {
-                'th11': 'LDAS TH11 Headset',
-                'g7': 'LDAS G7 Headset',
-                'g10': 'LDAS G10 Headset'
-            };
-
-            if (productSelect) {
-                productSelect.addEventListener('change', function() {
-                    productNameInput.value = productNames[this.value] || '';
-                });
+            // Reset forms and clear messages
+            if (modalId === 'addWarrantyModal') {
+                document.getElementById('addWarrantyForm').reset();
+                hideAlert('addWarrantyError');
+                hideAlert('addWarrantySuccess');
             }
+            if (modalId === 'editRegistrationModal') {
+                document.getElementById('editRegistrationForm').reset();
+                hideAlert('editRegistrationError');
+                hideAlert('editRegistrationSuccess');
+            }
+            if (modalId === 'processClaimModal') {
+                document.getElementById('processClaimForm').reset();
+                hideAlert('claimError');
+                hideAlert('claimSuccess');
+            }
+            
+            // Reset current editing state
+            currentEditingId = null;
+            currentActionType = null;
         }
 
-        // Add warranty number form
+        // Add single warranty number
         document.getElementById('addWarrantyForm').addEventListener('submit', async function(e) {
             e.preventDefault();
             
@@ -1936,11 +1632,8 @@
                 if (response.ok) {
                     showSuccess('addWarrantySuccess', 'Warranty number added successfully!');
                     document.getElementById('addWarrantyForm').reset();
-                    setTimeout(() => {
-                        closeModal('addWarrantyModal');
-                        loadWarrantyNumbers();
-                        loadDashboard();
-                    }, 1500);
+                    loadWarrantyNumbers();
+                    loadDashboard(); // Refresh stats
                 } else {
                     showError('addWarrantyError', data.error);
                 }
@@ -1949,44 +1642,21 @@
             }
         });
 
-        // Test connections
-        async function testEmailConnection() {
-            const resultDiv = document.getElementById('emailTestResult');
-            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Testing email connection...</div>';
+        // Product name mapping
+        function setupProductNameMapping() {
+            const productSelect = document.getElementById('productId');
+            const productNameInput = document.getElementById('productName');
             
-            try {
-                const response = await fetch(`${API_BASE}/admin/email/test`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-                const result = await response.json();
-                
-                if (result.success) {
-                    resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Email service connected successfully!</div>';
-                } else {
-                    resultDiv.innerHTML = `<div class="alert alert-error"><i class="fas fa-exclamation-triangle"></i> ${result.error || 'Email connection failed'}</div>`;
-                }
-            } catch (error) {
-                resultDiv.innerHTML = '<div class="alert alert-error"><i class="fas fa-exclamation-triangle"></i> Failed to test email connection</div>';
-            }
-        }
+            const productNames = {
+                'th11': 'LDAS TH11 Headset',
+                'g7': 'LDAS G7 Headset',
+                'g10': 'LDAS G10 Headset'
+            };
 
-        async function testShopifyConnection() {
-            const resultDiv = document.getElementById('shopifyTestResult');
-            resultDiv.innerHTML = '<div class="alert alert-info"><i class="fas fa-spinner fa-spin"></i> Testing Shopify connection...</div>';
-            
-            try {
-                const response = await fetch(`${API_BASE}/admin/shopify/test`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
+            if (productSelect) {
+                productSelect.addEventListener('change', function() {
+                    productNameInput.value = productNames[this.value] || '';
                 });
-                const result = await response.json();
-                
-                if (result.success) {
-                    resultDiv.innerHTML = '<div class="alert alert-success"><i class="fas fa-check-circle"></i> Shopify connected successfully!</div>';
-                } else {
-                    resultDiv.innerHTML = `<div class="alert alert-error"><i class="fas fa-exclamation-triangle"></i> ${result.error || 'Shopify connection failed'}</div>`;
-                }
-            } catch (error) {
-                resultDiv.innerHTML = '<div class="alert alert-error"><i class="fas fa-exclamation-triangle"></i> Failed to test Shopify connection</div>';
             }
         }
 
@@ -2025,7 +1695,7 @@
         function showError(elementId, message) {
             const element = document.getElementById(elementId);
             if (element) {
-                element.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+                element.textContent = message;
                 element.classList.remove('hidden');
             }
         }
@@ -2033,27 +1703,15 @@
         function showSuccess(elementId, message) {
             const element = document.getElementById(elementId);
             if (element) {
-                element.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+                element.textContent = message;
                 element.classList.remove('hidden');
             }
         }
 
-        // Placeholder functions for features not yet implemented
-        function editRegistration(id) {
-            alert('Edit registration feature - ID: ' + id);
-        }
-
-        function processWarrantyClaim(id) {
-            alert('Process claim feature - ID: ' + id);
-        }
-
-        function unlinkWarranty(id, warrantyNumber) {
-            alert('Unlink warranty feature - ID: ' + id + ', Warranty: ' + warrantyNumber);
-        }
-
-        function deleteRegistration(id, name) {
-            if (confirm(`Are you sure you want to delete the registration for ${name}?`)) {
-                alert('Delete registration feature - ID: ' + id);
+        function hideAlert(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.add('hidden');
             }
         }
 
@@ -2067,7 +1725,7 @@
             }
         }
 
-        // Keyboard shortcuts
+        // Keyboard shortcuts for search
         document.addEventListener('keydown', function(e) {
             // Ctrl+F or Cmd+F to focus search
             if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
@@ -2075,36 +1733,11 @@
                 const searchInput = document.getElementById('searchQuery');
                 if (searchInput) {
                     searchInput.focus();
-                    // Switch to search tab
-                    const searchTab = document.querySelector('[onclick*="customer-search"]');
-                    if (searchTab) {
-                        searchTab.click();
-                    }
+                    // Switch to search tab if not already there
+                    switchTab({ currentTarget: document.querySelector('[onclick*="customer-search"]') }, 'customer-search');
                 }
-            }
-            
-            // ESC to close modals
-            if (e.key === 'Escape') {
-                const modals = document.getElementsByClassName('modal');
-                for (let modal of modals) {
-                    modal.style.display = 'none';
-                }
-            }
-        });
-
-        // Auto-detect system theme preference
-        window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', function(e) {
-            const currentTheme = localStorage.getItem('theme');
-            if (currentTheme === 'auto') {
-                setTheme('auto');
             }
         });
     </script>
 </body>
 </html>
-                        <a href="#" class="nav-link active" onclick="switchTab(event, 'dashboard')">
-                            <i class="fas fa-chart-line nav-icon"></i>
-                            <span class="nav-text">Dashboard</span>
-                        </a>
-                    </li>
-                    <li class="nav-item">
