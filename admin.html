@@ -1415,37 +1415,193 @@
             `;
         }
 
-        // Placeholder functions for the rest of the functionality
-        // (These would contain all your existing functions from the original code)
-        
-        function loadWarrantyNumbers(page = 1) {
-            // Implementation from original code
-            console.log('Loading warranty numbers...');
+        // Warranty Numbers Management
+        async function loadWarrantyNumbers(page = 1) {
+            try {
+                const productFilter = document.getElementById('productFilter').value;
+                const statusFilter = document.getElementById('statusFilter').value;
+                
+                let url = `${API_BASE}/admin/warranty-numbers?page=${page}&limit=20`;
+                if (productFilter) url += `&productId=${productFilter}`;
+                if (statusFilter !== '') url += `&isUsed=${statusFilter}`;
+
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayWarrantyNumbers(data.warrantyNumbers);
+                    displayPagination('warrantyPagination', data.pagination, loadWarrantyNumbers);
+                } else {
+                    console.error('Failed to load warranty numbers');
+                }
+            } catch (error) {
+                console.error('Failed to load warranty numbers:', error);
+            }
         }
 
-        function loadRegistrations(page = 1) {
-            // Implementation from original code
-            console.log('Loading registrations...');
+        function displayWarrantyNumbers(warrantyNumbers) {
+            const tbody = document.getElementById('warrantyNumbersBody');
+            if (warrantyNumbers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No warranty numbers found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = warrantyNumbers.map(wn => `
+                <tr>
+                    <td>${wn.warrantyNumber}</td>
+                    <td>${wn.productName}</td>
+                    <td><span class="status-badge ${wn.isUsed ? 'status-used' : 'status-unused'}">
+                        ${wn.isUsed ? 'Used' : 'Available'}
+                    </span></td>
+                    <td>${new Date(wn.createdAt).toLocaleDateString()}</td>
+                    <td>${wn.registrationId ? wn.registrationId.fullName : '-'}</td>
+                </tr>
+            `).join('');
         }
 
-        function editRegistration(id) {
-            // Implementation from original code
-            console.log('Editing registration:', id);
+        // Enhanced Registrations Management
+        async function loadRegistrations(page = 1) {
+            try {
+                const productFilter = document.getElementById('regProductFilter').value;
+                const statusFilter = document.getElementById('regStatusFilter').value;
+                const emailFilter = document.getElementById('emailFilter').value;
+                
+                let url = `${API_BASE}/admin/registrations?page=${page}&limit=20`;
+                if (productFilter) url += `&productId=${productFilter}`;
+                if (statusFilter) url += `&status=${statusFilter}`;
+                if (emailFilter) url += `&email=${emailFilter}`;
+
+                const response = await fetch(url, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    displayRegistrations(data.registrations);
+                    displayPagination('registrationsPagination', data.pagination, loadRegistrations);
+                } else {
+                    console.error('Failed to load registrations');
+                }
+            } catch (error) {
+                console.error('Failed to load registrations:', error);
+            }
         }
 
-        function processWarrantyClaim(id) {
-            // Implementation from original code
-            console.log('Processing claim for:', id);
+        function displayRegistrations(registrations) {
+            const tbody = document.getElementById('registrationsBody');
+            if (registrations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-secondary);">No registrations found</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = registrations.map(reg => {
+                const warrantyEndDate = new Date(reg.warrantyEndDate);
+                const isExpired = warrantyEndDate < new Date();
+                const status = isExpired && reg.status === 'active' ? 'expired' : reg.status;
+                
+                return `
+                    <tr>
+                        <td>${reg.fullName}</td>
+                        <td>${reg.email}</td>
+                        <td>${reg.product}</td>
+                        <td>${reg.warrantyNumber || 'N/A'}</td>
+                        <td>${new Date(reg.purchaseDate).toLocaleDateString()}</td>
+                        <td><span class="status-badge status-${status}">
+                            ${status.charAt(0).toUpperCase() + status.slice(1)}
+                        </span></td>
+                        <td>${new Date(reg.createdAt).toLocaleDateString()}</td>
+                        <td style="width: 250px;">
+                            <button class="btn btn-primary btn-sm" onclick="editRegistration('${reg._id}')">✏️ Edit</button>
+                            <button class="btn btn-secondary btn-sm" onclick="processWarrantyClaim('${reg._id}')">🛠️ Claim</button>
+                            ${reg.warrantyNumber ? `<button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">🔗 Unlink</button>` : ''}
+                            <button class="btn btn-danger btn-sm" onclick="deleteRegistration('${reg._id}', '${reg.fullName}')">🗑️ Delete</button>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
         }
 
-        function unlinkWarranty(id, warrantyNumber) {
-            // Implementation from original code
-            console.log('Unlinking warranty:', warrantyNumber);
+        // Edit Registration Functions
+        async function editRegistration(registrationId) {
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const registration = await response.json();
+                    populateEditForm(registration);
+                    document.getElementById('editRegistrationModal').style.display = 'block';
+                } else {
+                    alert('Failed to load registration details');
+                }
+            } catch (error) {
+                console.error('Error loading registration:', error);
+                alert('Failed to load registration details');
+            }
         }
 
-        function deleteRegistration(id, name) {
-            // Implementation from original code
-            console.log('Deleting registration for:', name);
+        function populateEditForm(registration) {
+            document.getElementById('editRegistrationId').value = registration._id;
+            document.getElementById('editFirstName').value = registration.firstName;
+            document.getElementById('editLastName').value = registration.lastName;
+            document.getElementById('editEmail').value = registration.email;
+            document.getElementById('editProduct').value = registration.productId;
+            document.getElementById('editSource').value = registration.source;
+            document.getElementById('editOrderId').value = registration.orderId;
+            document.getElementById('editWarrantyNumber').value = registration.warrantyNumber || '';
+            document.getElementById('editPurchaseDate').value = registration.purchaseDate.split('T')[0];
+            document.getElementById('editStatus').value = registration.status;
+        }
+
+        // Process Warranty Claim
+        function processWarrantyClaim(registrationId) {
+            currentEditingId = registrationId;
+            
+            // Get registration details for the claim
+            fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                headers: { 'Authorization': `Bearer ${currentToken}` }
+            })
+            .then(response => response.json())
+            .then(registration => {
+                const claimInfo = document.getElementById('claimCustomerInfo');
+                claimInfo.innerHTML = `
+                    <div class="alert alert-info">
+                        <h4>📋 Warranty Claim for ${registration.fullName}</h4>
+                        <p><strong>Product:</strong> ${registration.product}</p>
+                        <p><strong>Warranty #:</strong> ${registration.warrantyNumber}</p>
+                        <p><strong>Purchase Date:</strong> ${new Date(registration.purchaseDate).toLocaleDateString()}</p>
+                        <p><strong>Email:</strong> ${registration.email}</p>
+                    </div>
+                `;
+                
+                document.getElementById('claimRegistrationId').value = registrationId;
+                document.getElementById('processClaimModal').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error loading registration for claim:', error);
+                alert('Failed to load registration details');
+            });
+        }
+
+        // Delete Registration Functions
+        function deleteRegistration(registrationId, customerName) {
+            currentEditingId = registrationId;
+            currentActionType = 'delete';
+            document.getElementById('deleteConfirmText').textContent = 
+                `Are you sure you want to delete the warranty registration for ${customerName}? This action cannot be undone and will make the warranty number available for reuse.`;
+            document.getElementById('deleteConfirmModal').style.display = 'block';
+        }
+
+        // Unlink Warranty Functions
+        function unlinkWarranty(registrationId, warrantyNumber) {
+            currentEditingId = registrationId;
+            currentActionType = 'unlink';
+            document.getElementById('unlinkConfirmText').textContent = 
+                `Are you sure you want to unlink warranty number ${warrantyNumber}? This will remove the registration and make the warranty number available for reuse by another customer.`;
+            document.getElementById('unlinkConfirmModal').style.display = 'block';
         }
 
         function openAddWarrantyModal() {
@@ -1454,13 +1610,53 @@
 
         function closeModal(modalId) {
             document.getElementById(modalId).style.display = 'none';
+            
+            // Reset forms and clear messages
+            if (modalId === 'addWarrantyModal') {
+                document.getElementById('addWarrantyForm').reset();
+                hideAlert('addWarrantyError');
+                hideAlert('addWarrantySuccess');
+            }
+            if (modalId === 'editRegistrationModal') {
+                document.getElementById('editRegistrationForm').reset();
+                hideAlert('editRegistrationError');
+                hideAlert('editRegistrationSuccess');
+            }
+            if (modalId === 'processClaimModal') {
+                document.getElementById('processClaimForm').reset();
+                hideAlert('claimError');
+                hideAlert('claimSuccess');
+            }
+            
+            // Reset current editing state
+            currentEditingId = null;
+            currentActionType = null;
         }
 
-        function exportRegistrations() {
-            // Implementation from original code
-            console.log('Exporting registrations...');
+        // Export registrations
+        async function exportRegistrations() {
+            try {
+                const response = await fetch(`${API_BASE}/admin/export/registrations`, {
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'warranty_registrations.csv';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('Export failed');
+                }
+            } catch (error) {
+                alert('Export failed: ' + error.message);
+            }
         }
 
+        // Debounced search
         function debounceLoadRegistrations() {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
@@ -1468,10 +1664,239 @@
             }, 500);
         }
 
+        // Product name mapping
         function setupProductNameMapping() {
-            // Implementation from original code
-            console.log('Setting up product name mapping...');
+            const productSelect = document.getElementById('productId');
+            const productNameInput = document.getElementById('productName');
+            
+            const productNames = {
+                'th11': 'LDAS TH11 Headset',
+                'g7': 'LDAS G7 Headset',
+                'g10': 'LDAS G10 Headset'
+            };
+
+            if (productSelect) {
+                productSelect.addEventListener('change', function() {
+                    productNameInput.value = productNames[this.value] || '';
+                });
+            }
         }
+
+        // Pagination
+        function displayPagination(containerId, pagination, loadFunction) {
+            const container = document.getElementById(containerId);
+            if (pagination.pages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+
+            let paginationHTML = '';
+            
+            if (pagination.page > 1) {
+                paginationHTML += `<button class="btn btn-secondary btn-sm" onclick="${loadFunction.name}(${pagination.page - 1})">Previous</button>`;
+            }
+
+            for (let i = 1; i <= pagination.pages; i++) {
+                if (i === pagination.page) {
+                    paginationHTML += `<button class="btn btn-primary btn-sm">${i}</button>`;
+                } else {
+                    paginationHTML += `<button class="btn btn-secondary btn-sm" onclick="${loadFunction.name}(${i})">${i}</button>`;
+                }
+            }
+
+            if (pagination.page < pagination.pages) {
+                paginationHTML += `<button class="btn btn-secondary btn-sm" onclick="${loadFunction.name}(${pagination.page + 1})">Next</button>`;
+            }
+
+            container.innerHTML = paginationHTML;
+            container.style.display = 'flex';
+            container.style.justifyContent = 'center';
+            container.style.gap = '8px';
+            container.style.marginTop = '20px';
+        }
+
+        // Form event listeners
+        document.getElementById('addWarrantyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const warrantyNumber = document.getElementById('warrantyNumber').value;
+            const productId = document.getElementById('productId').value;
+            const productName = document.getElementById('productName').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/warranty-numbers`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ warrantyNumber, productId, productName })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('addWarrantySuccess', 'Warranty number added successfully!');
+                    document.getElementById('addWarrantyForm').reset();
+                    loadWarrantyNumbers();
+                    loadDashboard();
+                } else {
+                    showError('addWarrantyError', data.error);
+                }
+            } catch (error) {
+                showError('addWarrantyError', 'Failed to add warranty number');
+            }
+        });
+
+        document.getElementById('editRegistrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const registrationId = document.getElementById('editRegistrationId').value;
+            const updatedData = {
+                firstName: document.getElementById('editFirstName').value.trim(),
+                lastName: document.getElementById('editLastName').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                productId: document.getElementById('editProduct').value,
+                source: document.getElementById('editSource').value,
+                orderId: document.getElementById('editOrderId').value.trim(),
+                purchaseDate: document.getElementById('editPurchaseDate').value,
+                status: document.getElementById('editStatus').value
+            };
+
+            updatedData.fullName = `${updatedData.firstName} ${updatedData.lastName}`;
+            
+            const productNames = {
+                'th11': 'LDAS TH11 Headset',
+                'g7': 'LDAS G7 Headset',
+                'g10': 'LDAS G10 Headset'
+            };
+            updatedData.product = productNames[updatedData.productId];
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    showSuccess('editRegistrationSuccess', 'Registration updated successfully!');
+                    setTimeout(() => {
+                        closeModal('editRegistrationModal');
+                        loadRegistrations();
+                        loadDashboard();
+                    }, 1500);
+                } else {
+                    showError('editRegistrationError', data.error || 'Failed to update registration');
+                }
+            } catch (error) {
+                console.error('Error updating registration:', error);
+                showError('editRegistrationError', 'Failed to update registration');
+            }
+        });
+
+        document.getElementById('processClaimForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const registrationId = document.getElementById('claimRegistrationId').value;
+            const claimType = document.getElementById('claimType').value;
+            const claimNotes = document.getElementById('claimNotes').value;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': `Bearer ${currentToken}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'claimed',
+                        claimType: claimType,
+                        claimNotes: claimNotes,
+                        claimDate: new Date().toISOString()
+                    })
+                });
+
+                if (response.ok) {
+                    showSuccess('claimSuccess', 'Warranty claim processed successfully!');
+                    setTimeout(() => {
+                        closeModal('processClaimModal');
+                        performCustomerSearch();
+                        loadDashboard();
+                    }, 1500);
+                } else {
+                    const data = await response.json();
+                    showError('claimError', data.error || 'Failed to process claim');
+                }
+            } catch (error) {
+                console.error('Error processing claim:', error);
+                showError('claimError', 'Failed to process warranty claim');
+            }
+        });
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+            if (currentActionType !== 'delete' || !currentEditingId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${currentEditingId}`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeModal('deleteConfirmModal');
+                    alert('Registration deleted successfully!');
+                    loadRegistrations();
+                    performCustomerSearch();
+                    loadDashboard();
+                } else {
+                    alert(data.error || 'Failed to delete registration');
+                }
+            } catch (error) {
+                console.error('Error deleting registration:', error);
+                alert('Failed to delete registration');
+            } finally {
+                currentEditingId = null;
+                currentActionType = null;
+            }
+        });
+
+        document.getElementById('confirmUnlinkBtn').addEventListener('click', async function() {
+            if (currentActionType !== 'unlink' || !currentEditingId) return;
+
+            try {
+                const response = await fetch(`${API_BASE}/admin/registrations/${currentEditingId}/unlink`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${currentToken}` }
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    closeModal('unlinkConfirmModal');
+                    alert('Warranty number unlinked successfully!');
+                    loadRegistrations();
+                    loadWarrantyNumbers();
+                    performCustomerSearch();
+                    loadDashboard();
+                } else {
+                    alert(data.error || 'Failed to unlink warranty number');
+                }
+            } catch (error) {
+                console.error('Error unlinking warranty:', error);
+                alert('Failed to unlink warranty number');
+            } finally {
+                currentEditingId = null;
+                currentActionType = null;
+            }
+        });
 
         function showError(elementId, message) {
             const element = document.getElementById(elementId);
@@ -1481,11 +1906,10 @@
             }
         }
 
-        function showSuccess(elementId, message) {
+        function hideAlert(elementId) {
             const element = document.getElementById(elementId);
             if (element) {
-                element.textContent = message;
-                element.classList.remove('hidden');
+                element.classList.add('hidden');
             }
         }
 
