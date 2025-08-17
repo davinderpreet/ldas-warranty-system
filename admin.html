@@ -1,756 +1,4 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LDAS Warranty Admin Portal</title>
-    <style>
-        :root {
-            /* Light mode variables */
-            --bg-primary: #ffffff;
-            --bg-secondary: #f8fafc;
-            --bg-tertiary: #f1f5f9;
-            --text-primary: #0f172a;
-            --text-secondary: #64748b;
-            --text-muted: #94a3b8;
-            --border-color: #e2e8f0;
-            --accent-primary: #3b82f6;
-            --accent-secondary: #06b6d4;
-            --success: #10b981;
-            --warning: #f59e0b;
-            --error: #ef4444;
-            --shadow: rgba(0, 0, 0, 0.1);
-            --shadow-lg: rgba(0, 0, 0, 0.15);
-        }
-
-        [data-theme="dark"] {
-            /* Dark mode variables */
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f8fafc;
-            --text-secondary: #cbd5e1;
-            --text-muted: #94a3b8;
-            --border-color: #334155;
-            --accent-primary: #60a5fa;
-            --accent-secondary: #22d3ee;
-            --success: #34d399;
-            --warning: #fbbf24;
-            --error: #f87171;
-            --shadow: rgba(0, 0, 0, 0.3);
-            --shadow-lg: rgba(0, 0, 0, 0.4);
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-            line-height: 1.6;
-        }
-
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-
-        /* Header */
-        .header {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 32px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 4px 6px var(--shadow);
-            backdrop-filter: blur(10px);
-        }
-
-        .header h1 {
-            color: var(--accent-primary);
-            font-size: 28px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-
-        .header h1::before {
-            content: "⚡";
-            font-size: 32px;
-        }
-
-        .header-controls {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .theme-toggle {
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border-color);
-            border-radius: 12px;
-            padding: 8px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s ease;
-            color: var(--text-secondary);
-            font-size: 14px;
-            font-weight: 500;
-        }
-
-        .theme-toggle:hover {
-            background: var(--accent-primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            color: var(--text-secondary);
-        }
-
-        .user-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: 600;
-            color: white;
-            font-size: 16px;
-        }
-
-        /* Buttons */
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 12px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin: 4px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
-            transition: left 0.5s;
-        }
-
-        .btn:hover::before {
-            left: 100%;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            color: white;
-            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
-        }
-
-        .btn-secondary {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-            border: 1px solid var(--border-color);
-        }
-
-        .btn-secondary:hover {
-            background: var(--accent-primary);
-            color: white;
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success), #059669);
-            color: white;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
-        }
-
-        .btn-success:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(16, 185, 129, 0.4);
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, var(--warning), #d97706);
-            color: white;
-            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--error), #dc2626);
-            color: white;
-            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
-        }
-
-        .btn-sm {
-            padding: 8px 16px;
-            font-size: 12px;
-        }
-
-        /* Login Form */
-        .login-container {
-            max-width: 420px;
-            margin: 100px auto;
-            background: var(--bg-primary);
-            padding: 48px;
-            border-radius: 24px;
-            box-shadow: 0 20px 40px var(--shadow-lg);
-            border: 1px solid var(--border-color);
-            backdrop-filter: blur(10px);
-        }
-
-        .login-container h2 {
-            text-align: center;
-            margin-bottom: 32px;
-            color: var(--accent-primary);
-            font-size: 32px;
-            font-weight: 700;
-        }
-
-        .form-group {
-            margin-bottom: 24px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 14px;
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-
-        /* Stats Grid */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-bottom: 32px;
-        }
-
-        .stat-card {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            padding: 32px;
-            border-radius: 20px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 6px var(--shadow);
-        }
-
-        .stat-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 4px;
-            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-        }
-
-        .stat-card:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px var(--shadow-lg);
-        }
-
-        .stat-number {
-            font-size: 48px;
-            font-weight: 800;
-            margin-bottom: 12px;
-            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 16px;
-            font-weight: 600;
-        }
-
-        /* Tabs */
-        .tabs {
-            display: flex;
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px 16px 0 0;
-            overflow: hidden;
-            box-shadow: 0 4px 6px var(--shadow);
-        }
-
-        .tab {
-            flex: 1;
-            padding: 20px 24px;
-            background: var(--bg-secondary);
-            border: none;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.3s ease;
-            color: var(--text-secondary);
-            position: relative;
-        }
-
-        .tab.active {
-            background: var(--bg-primary);
-            color: var(--accent-primary);
-        }
-
-        .tab.active::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
-        }
-
-        .tab:hover:not(.active) {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-
-        .tab-content {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-top: none;
-            padding: 32px;
-            border-radius: 0 0 16px 16px;
-            box-shadow: 0 4px 6px var(--shadow);
-        }
-
-        .tab-pane {
-            display: none;
-        }
-
-        .tab-pane.active {
-            display: block;
-        }
-
-        /* Search Container */
-        .search-container {
-            background: var(--bg-secondary);
-            border: 2px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 32px;
-            box-shadow: 0 4px 6px var(--shadow);
-        }
-
-        .search-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 24px;
-        }
-
-        .search-header h3 {
-            color: var(--text-primary);
-            font-size: 20px;
-            font-weight: 700;
-        }
-
-        .search-form {
-            display: grid;
-            grid-template-columns: 1fr 1fr auto;
-            gap: 16px;
-            align-items: end;
-        }
-
-        .search-input {
-            padding: 16px;
-            border: 2px solid var(--border-color);
-            border-radius: 12px;
-            font-size: 14px;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            transition: all 0.3s ease;
-        }
-
-        .search-input:focus {
-            outline: none;
-            border-color: var(--accent-primary);
-            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
-        }
-
-        /* Customer Cards */
-        .customer-card {
-            background: var(--bg-primary);
-            border: 1px solid var(--border-color);
-            border-radius: 16px;
-            padding: 24px;
-            margin-bottom: 16px;
-            box-shadow: 0 4px 6px var(--shadow);
-            transition: all 0.3s ease;
-        }
-
-        .customer-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px var(--shadow-lg);
-        }
-
-        .customer-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 16px;
-        }
-
-        .customer-info h4 {
-            color: var(--text-primary);
-            font-size: 20px;
-            font-weight: 700;
-            margin-bottom: 4px;
-        }
-
-        .customer-info p {
-            color: var(--text-secondary);
-            font-size: 14px;
-        }
-
-        .warranty-info {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 16px;
-            margin-top: 16px;
-        }
-
-        .warranty-detail {
-            background: var(--bg-secondary);
-            padding: 16px;
-            border-radius: 12px;
-            border-left: 4px solid var(--accent-primary);
-        }
-
-        .warranty-detail strong {
-            display: block;
-            color: var(--text-secondary);
-            font-size: 12px;
-            text-transform: uppercase;
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-
-        .warranty-detail span {
-            color: var(--text-primary);
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        /* Status Badges */
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        .status-active {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border: 1px solid rgba(16, 185, 129, 0.2);
-        }
-
-        .status-expired {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error);
-            border: 1px solid rgba(239, 68, 68, 0.2);
-        }
-
-        .status-claimed {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-primary);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        .status-used {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-primary);
-            border: 1px solid rgba(59, 130, 246, 0.2);
-        }
-
-        .status-unused {
-            background: rgba(148, 163, 184, 0.1);
-            color: var(--text-muted);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-        }
-
-        /* Tables */
-        .table-container {
-            overflow-x: auto;
-            margin-top: 24px;
-            border-radius: 16px;
-            border: 1px solid var(--border-color);
-            box-shadow: 0 4px 6px var(--shadow);
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--bg-primary);
-        }
-
-        th, td {
-            padding: 16px;
-            text-align: left;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        th {
-            background: var(--bg-secondary);
-            font-weight: 700;
-            color: var(--text-primary);
-            font-size: 14px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-
-        tr:hover {
-            background: var(--bg-secondary);
-        }
-
-        tr:last-child td {
-            border-bottom: none;
-        }
-
-        /* Alerts */
-        .alert {
-            padding: 16px 20px;
-            border-radius: 12px;
-            margin: 16px 0;
-            font-weight: 500;
-            border: 1px solid;
-        }
-
-        .alert-success {
-            background: rgba(16, 185, 129, 0.1);
-            color: var(--success);
-            border-color: rgba(16, 185, 129, 0.2);
-        }
-
-        .alert-error {
-            background: rgba(239, 68, 68, 0.1);
-            color: var(--error);
-            border-color: rgba(239, 68, 68, 0.2);
-        }
-
-        .alert-warning {
-            background: rgba(245, 158, 11, 0.1);
-            color: var(--warning);
-            border-color: rgba(245, 158, 11, 0.2);
-        }
-
-        .alert-info {
-            background: rgba(59, 130, 246, 0.1);
-            color: var(--accent-primary);
-            border-color: rgba(59, 130, 246, 0.2);
-        }
-
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.6);
-            backdrop-filter: blur(4px);
-        }
-
-        .modal-content {
-            background: var(--bg-primary);
-            margin: 2% auto;
-            padding: 32px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 600px;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 40px var(--shadow-lg);
-            border: 1px solid var(--border-color);
-        }
-
-        .close {
-            color: var(--text-muted);
-            float: right;
-            font-size: 28px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .close:hover {
-            color: var(--error);
-        }
-
-        /* Utilities */
-        .hidden {
-            display: none;
-        }
-
-        .no-results {
-            text-align: center;
-            padding: 48px;
-            color: var(--text-secondary);
-        }
-
-        .no-results i {
-            font-size: 48px;
-            margin-bottom: 16px;
-            display: block;
-            opacity: 0.5;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 16px;
-            }
-
-            .header {
-                flex-direction: column;
-                gap: 20px;
-                text-align: center;
-            }
-
-            .search-form {
-                grid-template-columns: 1fr;
-            }
-
-            .warranty-info {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-
-            .tabs {
-                flex-direction: column;
-            }
-
-            .tab {
-                border-bottom: 1px solid var(--border-color);
-            }
-        }
-
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .fade-in {
-            animation: fadeIn 0.5s ease-out;
-        }
-
-        /* Custom scrollbar */
-        ::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: var(--bg-secondary);
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: var(--text-muted);
-            border-radius: 4px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: var(--accent-primary);
-        }
-    </style>
-</head>
-<body>
-    <!-- Login Form -->
-    <div id="loginContainer" class="login-container fade-in">
-        <h2>🔐 Admin Login</h2>
-        <form id="loginForm">
-            <div class="form-group">
-                <label for="username">Username:</label>
-                <input type="text" id="username" required placeholder="Enter your username">
-            </div>
-            <div class="form-group">
-                <label for="password">Password:</label>
-                <input type="password" id="password" required placeholder="Enter your password">
-            </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">
-                🚀 Sign In
-            </button>
-        </form>
-        <div id="loginError" class="alert alert-error hidden"></div>
-    </div>
-
-    <!-- Admin Panel -->
-    <div id="adminPanel" class="hidden">
-        <div class="container">
-            <div class="header fade-in">
-                <h1>LDAS Warranty Portal</h1>
-                <div class="header-controls">
-                    <div class="theme-toggle" onclick="toggleTheme()">
-                        <span id="themeIcon">🌙</span>
-                        <span id="themeText">Dark Mode</span>
-                    </div>
-                    <div class="user-info">
+<div class="user-info">
                         <div class="user-avatar" id="userAvatar">A</div>
                         <span id="welcomeText">Welcome, Admin</span>
                         <button class="btn btn-secondary" onclick="logout()">
@@ -848,10 +96,10 @@
                         </div>
                     </div>
                     
-                    <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <div class="filters">
                         <div>
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Product:</label>
-                            <select id="regProductFilter" class="search-input" onchange="loadRegistrations()" style="min-width: 160px;">
+                            <label style="font-weight: 600; color: var(--text-secondary);">Product:</label>
+                            <select id="productFilter" onchange="loadWarrantyNumbers()" style="min-width: 160px; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
                                 <option value="">All Products</option>
                                 <option value="th11">TH11 Headset</option>
                                 <option value="g7">G7 Headset</option>
@@ -859,1100 +107,8 @@
                             </select>
                         </div>
                         <div>
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Status:</label>
-                            <select id="regStatusFilter" class="search-input" onchange="loadRegistrations()" style="min-width: 140px;">
-                                <option value="">All</option>
-                                <option value="active">Active</option>
-                                <option value="expired">Expired</option>
-                                <option value="claimed">Claimed</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Email:</label>
-                            <input type="text" id="emailFilter" class="search-input" placeholder="Search by email" onkeyup="debounceLoadRegistrations()" style="min-width: 200px;">
-                        </div>
-                    </div>
-
-                    <div class="table-container">
-                        <table id="registrationsTable">
-                            <thead>
-                                <tr>
-                                    <th>Name</th>
-                                    <th>Email</th>
-                                    <th>Product</th>
-                                    <th>Warranty #</th>
-                                    <th>Purchase Date</th>
-                                    <th>Status</th>
-                                    <th>Registered</th>
-                                    <th style="width: 250px;">Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="registrationsBody">
-                                <tr><td colspan="8" style="text-align: center; color: var(--text-secondary);">Loading registrations...</td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div id="registrationsPagination" class="pagination"></div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Add Warranty Number Modal -->
-    <div id="addWarrantyModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('addWarrantyModal')">&times;</span>
-            <h3 style="color: var(--accent-primary); margin-bottom: 24px;">➕ Add Warranty Number</h3>
-            <form id="addWarrantyForm">
-                <div class="form-group">
-                    <label for="warrantyNumber">Warranty Number:</label>
-                    <input type="text" id="warrantyNumber" pattern="[0-9]{4,5}" required placeholder="Enter 4-5 digits">
-                    <small style="color: var(--text-muted);">4-5 digits only</small>
-                </div>
-                <div class="form-group">
-                    <label for="productId">Product:</label>
-                    <select id="productId" required>
-                        <option value="">Select Product</option>
-                        <option value="th11">TH11 Headset</option>
-                        <option value="g7">G7 Headset</option>
-                        <option value="g10">G10 Headset</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label for="productName">Product Name:</label>
-                    <input type="text" id="productName" readonly style="background: var(--bg-secondary);">
-                </div>
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('addWarrantyModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Add Warranty Number</button>
-                </div>
-            </form>
-            <div id="addWarrantyError" class="alert alert-error hidden"></div>
-            <div id="addWarrantySuccess" class="alert alert-success hidden"></div>
-        </div>
-    </div>
-
-    <!-- Edit Registration Modal -->
-    <div id="editRegistrationModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('editRegistrationModal')">&times;</span>
-            <h3 style="color: var(--accent-primary); margin-bottom: 24px;">✏️ Edit Warranty Registration</h3>
-            <form id="editRegistrationForm">
-                <input type="hidden" id="editRegistrationId">
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <div class="form-group">
-                        <label for="editFirstName">First Name:</label>
-                        <input type="text" id="editFirstName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editLastName">Last Name:</label>
-                        <input type="text" id="editLastName" required>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editEmail">Email:</label>
-                    <input type="email" id="editEmail" required>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <div class="form-group">
-                        <label for="editProduct">Product:</label>
-                        <select id="editProduct" required>
-                            <option value="th11">TH11 Headset</option>
-                            <option value="g7">G7 Headset</option>
-                            <option value="g10">G10 Headset</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="editSource">Purchase Source:</label>
-                        <select id="editSource" required>
-                            <option value="Amazon.ca">Amazon.ca</option>
-                            <option value="Best Buy">Best Buy</option>
-                            <option value="LDAS.ca">LDAS.ca</option>
-                            <option value="Walmart">Walmart</option>
-                        </select>
-                    </div>
-                </div>
-                
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
-                    <div class="form-group">
-                        <label for="editOrderId">Order ID:</label>
-                        <input type="text" id="editOrderId" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="editWarrantyNumber">Warranty Number:</label>
-                        <input type="text" id="editWarrantyNumber" pattern="[0-9]{4,5}" required readonly style="background: var(--bg-secondary);">
-                        <small style="color: var(--text-muted);">Warranty number cannot be changed</small>
-                    </div>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editPurchaseDate">Purchase Date:</label>
-                    <input type="date" id="editPurchaseDate" required>
-                </div>
-                
-                <div class="form-group">
-                    <label for="editStatus">Status:</label>
-                    <select id="editStatus" required>
-                        <option value="active">Active</option>
-                        <option value="expired">Expired</option>
-                        <option value="claimed">Claimed</option>
-                    </select>
-                </div>
-                
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('editRegistrationModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Update Registration</button>
-                </div>
-            </form>
-            <div id="editRegistrationError" class="alert alert-error hidden"></div>
-            <div id="editRegistrationSuccess" class="alert alert-success hidden"></div>
-        </div>
-    </div>
-
-    <!-- Delete Confirmation Modal -->
-    <div id="deleteConfirmModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('deleteConfirmModal')">&times;</span>
-            <h3 style="color: var(--error); margin-bottom: 24px;">⚠️ Confirm Deletion</h3>
-            <div style="background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.2); padding: 20px; border-radius: 12px; margin: 20px 0;">
-                <h4 style="color: var(--error); margin-bottom: 12px;">Are you sure?</h4>
-                <p id="deleteConfirmText" style="color: var(--text-secondary); margin-bottom: 20px;">This action cannot be undone.</p>
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Cancel</button>
-                    <button id="confirmDeleteBtn" class="btn btn-danger">Yes, Delete</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Unlink Confirmation Modal -->
-    <div id="unlinkConfirmModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('unlinkConfirmModal')">&times;</span>
-            <h3 style="color: var(--warning); margin-bottom: 24px;">🔗 Unlink Warranty Number</h3>
-            <div style="background: rgba(245, 158, 11, 0.1); border: 1px solid rgba(245, 158, 11, 0.2); padding: 20px; border-radius: 12px; margin: 20px 0;">
-                <h4 style="color: var(--warning); margin-bottom: 12px;">Unlink Warranty Number?</h4>
-                <p id="unlinkConfirmText" style="color: var(--text-secondary); margin-bottom: 20px;">This will make the warranty number available for reuse.</p>
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button class="btn btn-secondary" onclick="closeModal('unlinkConfirmModal')">Cancel</button>
-                    <button id="confirmUnlinkBtn" class="btn btn-warning">Yes, Unlink</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Process Claim Modal -->
-    <div id="processClaimModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeModal('processClaimModal')">&times;</span>
-            <h3 style="color: var(--accent-primary); margin-bottom: 24px;">🛠️ Process Warranty Claim</h3>
-            <div id="claimCustomerInfo"></div>
-            <form id="processClaimForm">
-                <input type="hidden" id="claimRegistrationId">
-                
-                <div class="form-group">
-                    <label for="claimType">Claim Type:</label>
-                    <select id="claimType" required>
-                        <option value="">Select Claim Type</option>
-                        <option value="replacement">Product Replacement</option>
-                        <option value="repair">Product Repair</option>
-                        <option value="refund">Refund Request</option>
-                        <option value="technical">Technical Support</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="claimNotes">Claim Notes:</label>
-                    <textarea id="claimNotes" rows="4" placeholder="Enter details about the warranty claim..."></textarea>
-                </div>
-                
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
-                    <button type="button" class="btn btn-secondary" onclick="closeModal('processClaimModal')">Cancel</button>
-                    <button type="submit" class="btn btn-primary">Process Claim</button>
-                </div>
-            </form>
-            <div id="claimError" class="alert alert-error hidden"></div>
-            <div id="claimSuccess" class="alert alert-success hidden"></div>
-        </div>
-    </div>
-
-    <script>
-        // Global variables
-        const API_BASE = 'https://ldas-warranty-system.onrender.com/api';
-        let currentToken = localStorage.getItem('adminToken');
-        let currentPage = 1;
-        let debounceTimer;
-        let searchDebounceTimer;
-        let currentEditingId = null;
-        let currentActionType = null;
-
-        // Theme management
-        function initializeTheme() {
-            const savedTheme = localStorage.getItem('theme') || 'light';
-            document.documentElement.setAttribute('data-theme', savedTheme);
-            updateThemeToggle(savedTheme);
-        }
-
-        function toggleTheme() {
-            const currentTheme = document.documentElement.getAttribute('data-theme');
-            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
-            
-            document.documentElement.setAttribute('data-theme', newTheme);
-            localStorage.setItem('theme', newTheme);
-            updateThemeToggle(newTheme);
-        }
-
-        function updateThemeToggle(theme) {
-            const themeIcon = document.getElementById('themeIcon');
-            const themeText = document.getElementById('themeText');
-            
-            if (theme === 'dark') {
-                themeIcon.textContent = '☀️';
-                themeText.textContent = 'Light Mode';
-            } else {
-                themeIcon.textContent = '🌙';
-                themeText.textContent = 'Dark Mode';
-            }
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeTheme();
-            
-            if (currentToken) {
-                showAdminPanel();
-                loadDashboard();
-            } else {
-                showLogin();
-            }
-            setupProductNameMapping();
-        });
-
-        function showLogin() {
-            document.getElementById('loginContainer').classList.remove('hidden');
-            document.getElementById('adminPanel').classList.add('hidden');
-        }
-
-        function showAdminPanel() {
-            document.getElementById('loginContainer').classList.add('hidden');
-            document.getElementById('adminPanel').classList.remove('hidden');
-        }
-
-        // Authentication
-        document.getElementById('loginForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-
-            try {
-                const response = await fetch(`${API_BASE}/admin/login`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ username, password })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    currentToken = data.token;
-                    localStorage.setItem('adminToken', currentToken);
-                    document.getElementById('welcomeText').textContent = `Welcome, ${data.admin.username}`;
-                    document.getElementById('userAvatar').textContent = data.admin.username.charAt(0).toUpperCase();
-                    showAdminPanel();
-                    loadDashboard();
-                } else {
-                    showError('loginError', data.error);
-                }
-            } catch (error) {
-                showError('loginError', 'Login failed. Please try again.');
-            }
-        });
-
-        function logout() {
-            localStorage.removeItem('adminToken');
-            currentToken = null;
-            showLogin();
-            document.getElementById('loginForm').reset();
-        }
-
-        // Tab switching with animation
-        function switchTab(evt, tabName) {
-            const tabcontent = document.getElementsByClassName('tab-pane');
-            for (let i = 0; i < tabcontent.length; i++) {
-                tabcontent[i].classList.remove('active');
-            }
-
-            const tablinks = document.getElementsByClassName('tab');
-            for (let i = 0; i < tablinks.length; i++) {
-                tablinks[i].classList.remove('active');
-            }
-
-            document.getElementById(tabName).classList.add('active');
-            evt.currentTarget.classList.add('active');
-
-            // Add fade-in animation
-            document.getElementById(tabName).classList.add('fade-in');
-
-            if (tabName === 'warranty-numbers') {
-                loadWarrantyNumbers();
-            } else if (tabName === 'registrations') {
-                loadRegistrations();
-            } else if (tabName === 'customer-search') {
-                resetSearch();
-            }
-        }
-
-        function resetSearch() {
-            document.getElementById('searchQuery').value = '';
-            document.getElementById('searchResults').innerHTML = `
-                <div class="no-results">
-                    <i>🔍</i>
-                    <h4>Ready to Search</h4>
-                    <p>Enter a search term above to find customer warranty information</p>
-                </div>
-            `;
-        }
-
-        // Dashboard
-        async function loadDashboard() {
-            try {
-                const response = await fetch(`${API_BASE}/admin/stats`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-
-                if (response.ok) {
-                    const stats = await response.json();
-                    displayStats(stats);
-                } else {
-                    console.error('Failed to load stats');
-                }
-            } catch (error) {
-                console.error('Failed to load dashboard:', error);
-            }
-        }
-
-        function displayStats(stats) {
-            const statsGrid = document.getElementById('statsGrid');
-            statsGrid.innerHTML = `
-                <div class="stat-card">
-                    <div class="stat-number">${stats.totalWarrantyNumbers || 0}</div>
-                    <div class="stat-label">Total Warranty Numbers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${stats.availableWarrantyNumbers || 0}</div>
-                    <div class="stat-label">Available Numbers</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${stats.totalRegistrations || 0}</div>
-                    <div class="stat-label">Total Registrations</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${stats.activeWarranties || 0}</div>
-                    <div class="stat-label">Active Warranties</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-number">${stats.recentRegistrations || 0}</div>
-                    <div class="stat-label">Recent (7 days)</div>
-                </div>
-                ${stats.claimsOverview ? `
-                <div class="stat-card">
-                    <div class="stat-number">${stats.claimsOverview.totalClaims || 0}</div>
-                    <div class="stat-label">Total Claims</div>
-                </div>
-                ` : ''}
-            `;
-        }
-
-        // Customer Search Functions
-        function debounceCustomerSearch() {
-            clearTimeout(searchDebounceTimer);
-            searchDebounceTimer = setTimeout(() => {
-                performCustomerSearch();
-            }, 500);
-        }
-
-        async function performCustomerSearch() {
-            const query = document.getElementById('searchQuery').value.trim();
-            const searchType = document.getElementById('searchType').value;
-            const resultsContainer = document.getElementById('searchResults');
-
-            if (!query) {
-                resetSearch();
-                return;
-            }
-
-            // Show loading
-            resultsContainer.innerHTML = `
-                <div class="no-results">
-                    <i>⏳</i>
-                    <h4>Searching...</h4>
-                    <p>Looking for customer warranty information</p>
-                </div>
-            `;
-
-            try {
-                let searchUrl = `${API_BASE}/admin/registrations?limit=50`;
-                
-                switch(searchType) {
-                    case 'email':
-                        searchUrl += `&email=${encodeURIComponent(query)}`;
-                        break;
-                    case 'warranty':
-                        searchUrl += `&warrantyNumber=${encodeURIComponent(query)}`;
-                        break;
-                    case 'order':
-                        searchUrl += `&orderId=${encodeURIComponent(query)}`;
-                        break;
-                    case 'name':
-                        searchUrl += `&name=${encodeURIComponent(query)}`;
-                        break;
-                    default:
-                        searchUrl += `&search=${encodeURIComponent(query)}`;
-                }
-
-                const response = await fetch(searchUrl, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    displaySearchResults(data.registrations, query);
-                } else {
-                    throw new Error('Search failed');
-                }
-            } catch (error) {
-                console.error('Search error:', error);
-                resultsContainer.innerHTML = `
-                    <div class="no-results">
-                        <i>❌</i>
-                        <h4>Search Error</h4>
-                        <p>Unable to perform search. Please try again.</p>
-                    </div>
-                `;
-            }
-        }
-
-        function displaySearchResults(registrations, query) {
-            const resultsContainer = document.getElementById('searchResults');
-            
-            if (registrations.length === 0) {
-                resultsContainer.innerHTML = `
-                    <div class="no-results">
-                        <i>🔭</i>
-                        <h4>No Results Found</h4>
-                        <p>No warranty registrations found for "${query}"</p>
-                    </div>
-                `;
-                return;
-            }
-
-            const resultsHTML = registrations.map(reg => {
-                const warrantyEndDate = new Date(reg.warrantyEndDate);
-                const isExpired = warrantyEndDate < new Date();
-                const daysRemaining = Math.ceil((warrantyEndDate - new Date()) / (1000 * 60 * 60 * 24));
-                const status = isExpired ? 'expired' : reg.status;
-                
-                return `
-                    <div class="customer-card">
-                        <div class="customer-header">
-                            <div class="customer-info">
-                                <h4>${reg.fullName}</h4>
-                                <p>✉️ ${reg.email}</p>
-                            </div>
-                            <div>
-                                <span class="status-badge status-${status}">
-                                    ${status.charAt(0).toUpperCase() + status.slice(1)}
-                                </span>
-                            </div>
-                        </div>
-                        
-                        <div class="warranty-info">
-                            <div class="warranty-detail">
-                                <strong>Product</strong>
-                                <span>${reg.product}</span>
-                            </div>
-                            <div class="warranty-detail">
-                                <strong>Warranty Number</strong>
-                                <span>${reg.warrantyNumber || 'N/A'}</span>
-                            </div>
-                            <div class="warranty-detail">
-                                <strong>Purchase Date</strong>
-                                <span>${new Date(reg.purchaseDate).toLocaleDateString()}</span>
-                            </div>
-                            <div class="warranty-detail">
-                                <strong>Purchase Source</strong>
-                                <span>${reg.source}</span>
-                            </div>
-                            <div class="warranty-detail">
-                                <strong>Order ID</strong>
-                                <span>${reg.orderId}</span>
-                            </div>
-                            <div class="warranty-detail">
-                                <strong>Warranty Expires</strong>
-                                <span>${warrantyEndDate.toLocaleDateString()} ${isExpired ? '(Expired)' : `(${daysRemaining} days)`}</span>
-                            </div>
-                        </div>
-                        
-                        <div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;">
-                            <button class="btn btn-primary btn-sm" onclick="editRegistration('${reg._id}')">✏️ Edit</button>
-                            <button class="btn btn-secondary btn-sm" onclick="processWarrantyClaim('${reg._id}')">🛠️ Process Claim</button>
-                            ${reg.warrantyNumber ? `<button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">🔗 Unlink</button>` : ''}
-                            <button class="btn btn-danger btn-sm" onclick="deleteRegistration('${reg._id}', '${reg.fullName}')">🗑️ Delete</button>
-                        </div>
-                    </div>
-                `;
-            }).join('');
-
-            resultsContainer.innerHTML = `
-                <div style="margin-bottom: 24px;">
-                    <h4 style="color: var(--text-primary);">Search Results (${registrations.length} found)</h4>
-                    <p style="color: var(--text-secondary);">Found ${registrations.length} warranty registration(s) for "${query}"</p>
-                </div>
-                ${resultsHTML}
-            `;
-        }
-
-        // Warranty Numbers Management
-        async function loadWarrantyNumbers(page = 1) {
-            try {
-                const productFilter = document.getElementById('productFilter').value;
-                const statusFilter = document.getElementById('statusFilter').value;
-                
-                let url = `${API_BASE}/admin/warranty-numbers?page=${page}&limit=20`;
-                if (productFilter) url += `&productId=${productFilter}`;
-                if (statusFilter !== '') url += `&isUsed=${statusFilter}`;
-
-                const response = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    displayWarrantyNumbers(data.warrantyNumbers);
-                    displayPagination('warrantyPagination', data.pagination, loadWarrantyNumbers);
-                } else {
-                    console.error('Failed to load warranty numbers');
-                }
-            } catch (error) {
-                console.error('Failed to load warranty numbers:', error);
-            }
-        }
-
-        function displayWarrantyNumbers(warrantyNumbers) {
-            const tbody = document.getElementById('warrantyNumbersBody');
-            if (warrantyNumbers.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No warranty numbers found</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = warrantyNumbers.map(wn => `
-                <tr>
-                    <td>${wn.warrantyNumber}</td>
-                    <td>${wn.productName}</td>
-                    <td><span class="status-badge ${wn.isUsed ? 'status-used' : 'status-unused'}">
-                        ${wn.isUsed ? 'Used' : 'Available'}
-                    </span></td>
-                    <td>${new Date(wn.createdAt).toLocaleDateString()}</td>
-                    <td>${wn.registrationId ? wn.registrationId.fullName : '-'}</td>
-                </tr>
-            `).join('');
-        }
-
-        // Enhanced Registrations Management
-        async function loadRegistrations(page = 1) {
-            try {
-                const productFilter = document.getElementById('regProductFilter').value;
-                const statusFilter = document.getElementById('regStatusFilter').value;
-                const emailFilter = document.getElementById('emailFilter').value;
-                
-                let url = `${API_BASE}/admin/registrations?page=${page}&limit=20`;
-                if (productFilter) url += `&productId=${productFilter}`;
-                if (statusFilter) url += `&status=${statusFilter}`;
-                if (emailFilter) url += `&email=${emailFilter}`;
-
-                const response = await fetch(url, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    displayRegistrations(data.registrations);
-                    displayPagination('registrationsPagination', data.pagination, loadRegistrations);
-                } else {
-                    console.error('Failed to load registrations');
-                }
-            } catch (error) {
-                console.error('Failed to load registrations:', error);
-            }
-        }
-
-        function displayRegistrations(registrations) {
-            const tbody = document.getElementById('registrationsBody');
-            if (registrations.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-secondary);">No registrations found</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = registrations.map(reg => {
-                const warrantyEndDate = new Date(reg.warrantyEndDate);
-                const isExpired = warrantyEndDate < new Date();
-                const status = isExpired && reg.status === 'active' ? 'expired' : reg.status;
-                
-                return `
-                    <tr>
-                        <td>${reg.fullName}</td>
-                        <td>${reg.email}</td>
-                        <td>${reg.product}</td>
-                        <td>${reg.warrantyNumber || 'N/A'}</td>
-                        <td>${new Date(reg.purchaseDate).toLocaleDateString()}</td>
-                        <td><span class="status-badge status-${status}">
-                            ${status.charAt(0).toUpperCase() + status.slice(1)}
-                        </span></td>
-                        <td>${new Date(reg.createdAt).toLocaleDateString()}</td>
-                        <td style="width: 250px;">
-                            <button class="btn btn-primary btn-sm" onclick="editRegistration('${reg._id}')">✏️ Edit</button>
-                            <button class="btn btn-secondary btn-sm" onclick="processWarrantyClaim('${reg._id}')">🛠️ Claim</button>
-                            ${reg.warrantyNumber ? `<button class="btn btn-warning btn-sm" onclick="unlinkWarranty('${reg._id}', '${reg.warrantyNumber}')">🔗 Unlink</button>` : ''}
-                            <button class="btn btn-danger btn-sm" onclick="deleteRegistration('${reg._id}', '${reg.fullName}')">🗑️ Delete</button>
-                        </td>
-                    </tr>
-                `;
-            }).join('');
-        }
-
-        // Edit Registration Functions
-        async function editRegistration(registrationId) {
-            try {
-                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-
-                if (response.ok) {
-                    const registration = await response.json();
-                    populateEditForm(registration);
-                    document.getElementById('editRegistrationModal').style.display = 'block';
-                } else {
-                    alert('Failed to load registration details');
-                }
-            } catch (error) {
-                console.error('Error loading registration:', error);
-                alert('Failed to load registration details');
-            }
-        }
-
-        function populateEditForm(registration) {
-            document.getElementById('editRegistrationId').value = registration._id;
-            document.getElementById('editFirstName').value = registration.firstName;
-            document.getElementById('editLastName').value = registration.lastName;
-            document.getElementById('editEmail').value = registration.email;
-            document.getElementById('editProduct').value = registration.productId;
-            document.getElementById('editSource').value = registration.source;
-            document.getElementById('editOrderId').value = registration.orderId;
-            document.getElementById('editWarrantyNumber').value = registration.warrantyNumber || '';
-            document.getElementById('editPurchaseDate').value = registration.purchaseDate.split('T')[0];
-            document.getElementById('editStatus').value = registration.status;
-        }
-
-        // Process Warranty Claim
-        function processWarrantyClaim(registrationId) {
-            currentEditingId = registrationId;
-            
-            // Get registration details for the claim
-            fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
-                headers: { 'Authorization': `Bearer ${currentToken}` }
-            })
-            .then(response => response.json())
-            .then(registration => {
-                const claimInfo = document.getElementById('claimCustomerInfo');
-                claimInfo.innerHTML = `
-                    <div class="alert alert-info">
-                        <h4>📋 Warranty Claim for ${registration.fullName}</h4>
-                        <p><strong>Product:</strong> ${registration.product}</p>
-                        <p><strong>Warranty #:</strong> ${registration.warrantyNumber}</p>
-                        <p><strong>Purchase Date:</strong> ${new Date(registration.purchaseDate).toLocaleDateString()}</p>
-                        <p><strong>Email:</strong> ${registration.email}</p>
-                    </div>
-                `;
-                
-                document.getElementById('claimRegistrationId').value = registrationId;
-                document.getElementById('processClaimModal').style.display = 'block';
-            })
-            .catch(error => {
-                console.error('Error loading registration for claim:', error);
-                alert('Failed to load registration details');
-            });
-        }
-
-        // Delete Registration Functions
-        function deleteRegistration(registrationId, customerName) {
-            currentEditingId = registrationId;
-            currentActionType = 'delete';
-            document.getElementById('deleteConfirmText').textContent = 
-                `Are you sure you want to delete the warranty registration for ${customerName}? This action cannot be undone and will make the warranty number available for reuse.`;
-            document.getElementById('deleteConfirmModal').style.display = 'block';
-        }
-
-        // Unlink Warranty Functions
-        function unlinkWarranty(registrationId, warrantyNumber) {
-            currentEditingId = registrationId;
-            currentActionType = 'unlink';
-            document.getElementById('unlinkConfirmText').textContent = 
-                `Are you sure you want to unlink warranty number ${warrantyNumber}? This will remove the registration and make the warranty number available for reuse by another customer.`;
-            document.getElementById('unlinkConfirmModal').style.display = 'block';
-        }
-
-        function openAddWarrantyModal() {
-            document.getElementById('addWarrantyModal').style.display = 'block';
-        }
-
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-            
-            // Reset forms and clear messages
-            if (modalId === 'addWarrantyModal') {
-                document.getElementById('addWarrantyForm').reset();
-                hideAlert('addWarrantyError');
-                hideAlert('addWarrantySuccess');
-            }
-            if (modalId === 'editRegistrationModal') {
-                document.getElementById('editRegistrationForm').reset();
-                hideAlert('editRegistrationError');
-                hideAlert('editRegistrationSuccess');
-            }
-            if (modalId === 'processClaimModal') {
-                document.getElementById('processClaimForm').reset();
-                hideAlert('claimError');
-                hideAlert('claimSuccess');
-            }
-            
-            // Reset current editing state
-            currentEditingId = null;
-            currentActionType = null;
-        }
-
-        // Export registrations
-        async function exportRegistrations() {
-            try {
-                const response = await fetch(`${API_BASE}/admin/export/registrations`, {
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-
-                if (response.ok) {
-                    const blob = await response.blob();
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = 'warranty_registrations.csv';
-                    a.click();
-                    window.URL.revokeObjectURL(url);
-                } else {
-                    alert('Export failed');
-                }
-            } catch (error) {
-                alert('Export failed: ' + error.message);
-            }
-        }
-
-        // Debounced search
-        function debounceLoadRegistrations() {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => {
-                loadRegistrations(1);
-            }, 500);
-        }
-
-        // Product name mapping
-        function setupProductNameMapping() {
-            const productSelect = document.getElementById('productId');
-            const productNameInput = document.getElementById('productName');
-            
-            const productNames = {
-                'th11': 'LDAS TH11 Headset',
-                'g7': 'LDAS G7 Headset',
-                'g10': 'LDAS G10 Headset'
-            };
-
-            if (productSelect) {
-                productSelect.addEventListener('change', function() {
-                    productNameInput.value = productNames[this.value] || '';
-                });
-            }
-        }
-
-        // Pagination
-        function displayPagination(containerId, pagination, loadFunction) {
-            const container = document.getElementById(containerId);
-            if (pagination.pages <= 1) {
-                container.innerHTML = '';
-                return;
-            }
-
-            let paginationHTML = '';
-            
-            if (pagination.page > 1) {
-                paginationHTML += `<button class="btn btn-secondary btn-sm" onclick="${loadFunction.name}(${pagination.page - 1})">Previous</button>`;
-            }
-
-            for (let i = 1; i <= pagination.pages; i++) {
-                if (i === pagination.page) {
-                    paginationHTML += `<button class="btn btn-primary btn-sm">${i}</button>`;
-                } else {
-                    paginationHTML += `<button class="btn btn-secondary btn-sm" onclick="${loadFunction.name}(${i})">${i}</button>`;
-                }
-            }
-
-            if (pagination.page < pagination.pages) {
-                paginationHTML += `<button class="btn btn-secondary btn-sm" onclick="${loadFunction.name}(${pagination.page + 1})">Next</button>`;
-            }
-
-            container.innerHTML = paginationHTML;
-            container.style.display = 'flex';
-            container.style.justifyContent = 'center';
-            container.style.gap = '8px';
-            container.style.marginTop = '20px';
-        }
-
-        // Form event listeners
-        document.getElementById('addWarrantyForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const warrantyNumber = document.getElementById('warrantyNumber').value;
-            const productId = document.getElementById('productId').value;
-            const productName = document.getElementById('productName').value;
-
-            try {
-                const response = await fetch(`${API_BASE}/admin/warranty-numbers`, {
-                    method: 'POST',
-                    headers: {
-                        'Authorization': `Bearer ${currentToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ warrantyNumber, productId, productName })
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showSuccess('addWarrantySuccess', 'Warranty number added successfully!');
-                    document.getElementById('addWarrantyForm').reset();
-                    loadWarrantyNumbers();
-                    loadDashboard();
-                } else {
-                    showError('addWarrantyError', data.error);
-                }
-            } catch (error) {
-                showError('addWarrantyError', 'Failed to add warranty number');
-            }
-        });
-
-        document.getElementById('editRegistrationForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const registrationId = document.getElementById('editRegistrationId').value;
-            const updatedData = {
-                firstName: document.getElementById('editFirstName').value.trim(),
-                lastName: document.getElementById('editLastName').value.trim(),
-                email: document.getElementById('editEmail').value.trim(),
-                productId: document.getElementById('editProduct').value,
-                source: document.getElementById('editSource').value,
-                orderId: document.getElementById('editOrderId').value.trim(),
-                purchaseDate: document.getElementById('editPurchaseDate').value,
-                status: document.getElementById('editStatus').value
-            };
-
-            updatedData.fullName = `${updatedData.firstName} ${updatedData.lastName}`;
-            
-            const productNames = {
-                'th11': 'LDAS TH11 Headset',
-                'g7': 'LDAS G7 Headset',
-                'g10': 'LDAS G10 Headset'
-            };
-            updatedData.product = productNames[updatedData.productId];
-
-            try {
-                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${currentToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(updatedData)
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    showSuccess('editRegistrationSuccess', 'Registration updated successfully!');
-                    setTimeout(() => {
-                        closeModal('editRegistrationModal');
-                        loadRegistrations();
-                        loadDashboard();
-                    }, 1500);
-                } else {
-                    showError('editRegistrationError', data.error || 'Failed to update registration');
-                }
-            } catch (error) {
-                console.error('Error updating registration:', error);
-                showError('editRegistrationError', 'Failed to update registration');
-            }
-        });
-
-        document.getElementById('processClaimForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const registrationId = document.getElementById('claimRegistrationId').value;
-            const claimType = document.getElementById('claimType').value;
-            const claimNotes = document.getElementById('claimNotes').value;
-
-            try {
-                const response = await fetch(`${API_BASE}/admin/registrations/${registrationId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Authorization': `Bearer ${currentToken}`,
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: 'claimed',
-                        claimType: claimType,
-                        claimNotes: claimNotes,
-                        claimDate: new Date().toISOString()
-                    })
-                });
-
-                if (response.ok) {
-                    showSuccess('claimSuccess', 'Warranty claim processed successfully!');
-                    setTimeout(() => {
-                        closeModal('processClaimModal');
-                        performCustomerSearch();
-                        loadDashboard();
-                    }, 1500);
-                } else {
-                    const data = await response.json();
-                    showError('claimError', data.error || 'Failed to process claim');
-                }
-            } catch (error) {
-                console.error('Error processing claim:', error);
-                showError('claimError', 'Failed to process warranty claim');
-            }
-        });
-
-        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
-            if (currentActionType !== 'delete' || !currentEditingId) return;
-
-            try {
-                const response = await fetch(`${API_BASE}/admin/registrations/${currentEditingId}`, {
-                    method: 'DELETE',
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    closeModal('deleteConfirmModal');
-                    alert('Registration deleted successfully!');
-                    loadRegistrations();
-                    performCustomerSearch();
-                    loadDashboard();
-                } else {
-                    alert(data.error || 'Failed to delete registration');
-                }
-            } catch (error) {
-                console.error('Error deleting registration:', error);
-                alert('Failed to delete registration');
-            } finally {
-                currentEditingId = null;
-                currentActionType = null;
-            }
-        });
-
-        document.getElementById('confirmUnlinkBtn').addEventListener('click', async function() {
-            if (currentActionType !== 'unlink' || !currentEditingId) return;
-
-            try {
-                const response = await fetch(`${API_BASE}/admin/registrations/${currentEditingId}/unlink`, {
-                    method: 'POST',
-                    headers: { 'Authorization': `Bearer ${currentToken}` }
-                });
-
-                const data = await response.json();
-
-                if (response.ok) {
-                    closeModal('unlinkConfirmModal');
-                    alert('Warranty number unlinked successfully!');
-                    loadRegistrations();
-                    loadWarrantyNumbers();
-                    performCustomerSearch();
-                    loadDashboard();
-                } else {
-                    alert(data.error || 'Failed to unlink warranty number');
-                }
-            } catch (error) {
-                console.error('Error unlinking warranty:', error);
-                alert('Failed to unlink warranty number');
-            } finally {
-                currentEditingId = null;
-                currentActionType = null;
-            }
-        });
-
-        function showError(elementId, message) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.textContent = message;
-                element.classList.remove('hidden');
-            }
-        }
-
-        function hideAlert(elementId) {
-            const element = document.getElementById(elementId);
-            if (element) {
-                element.classList.add('hidden');
-            }
-        }
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            const modals = document.getElementsByClassName('modal');
-            for (let modal of modals) {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            }
-        }
-
-        // Keyboard shortcuts
-        document.addEventListener('keydown', function(e) {
-            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
-                e.preventDefault();
-                const searchInput = document.getElementById('searchQuery');
-                if (searchInput) {
-                    searchInput.focus();
-                    switchTab({ currentTarget: document.querySelector('[onclick*="customer-search"]') }, 'customer-search');
-                }
-            }
-            
-            // Theme toggle with Ctrl+Shift+T
-            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
-                e.preventDefault();
-                toggleTheme();
-            }
-        });
-    </script>
-</body>
-</html>bottom: 8px; font-weight: 600; color: var(--text-secondary);">Product:</label>
-                            <select id="productFilter" class="search-input" onchange="loadWarrantyNumbers()" style="min-width: 160px;">
-                                <option value="">All Products</option>
-                                <option value="th11">TH11 Headset</option>
-                                <option value="g7">G7 Headset</option>
-                                <option value="g10">G10 Headset</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label style="display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-secondary);">Status:</label>
-                            <select id="statusFilter" class="search-input" onchange="loadWarrantyNumbers()" style="min-width: 140px;">
+                            <label style="font-weight: 600; color: var(--text-secondary);">Status:</label>
+                            <select id="statusFilter" onchange="loadWarrantyNumbers()" style="min-width: 140px; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
                                 <option value="">All</option>
                                 <option value="false">Unused</option>
                                 <option value="true">Used</option>
@@ -1988,6 +144,1674 @@
                         </button>
                     </div>
                     
-                    <div style="display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap;">
+                    <div class="filters">
                         <div>
-                            <label style="display: block; margin-
+                            <label style="font-weight: 600; color: var(--text-secondary);">Product:</label>
+                            <select id="regProductFilter" onchange="loadRegistrations()" style="min-width: 160px; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
+                                <option value="">All Products</option>
+                                <option value="th11">TH11 Headset</option>
+                                <option value="g7">G7 Headset</option>
+                                <option value="g10">G10 Headset</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: var(--text-secondary);">Status:</label>
+                            <select id="regStatusFilter" onchange="loadRegistrations()" style="min-width: 140px; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
+                                <option value="">All</option>
+                                <option value="active">Active</option>
+                                <option value="expired">Expired</option>
+                                <option value="claimed">Claimed</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label style="font-weight: 600; color: var(--text-secondary);">Email:</label>
+                            <input type="text" id="emailFilter" placeholder="Search by email" onkeyup="debounceLoadRegistrations()" style="min-width: 200px; padding: 12px; border: 2px solid var(--border-color); border-radius: 8px; background: var(--bg-primary); color: var(--text-primary);">
+                        </div>
+                    </div>
+
+                    <div class="table-container">
+                        <table id="registrationsTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Product</th>
+                                    <th>Warranty #</th>
+                                    <th>Purchase Date</th>
+                                    <th>Status</th>
+                                    <th>Registered</th>
+                                    <th class="actions-column">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="registrationsBody">
+                                <tr><td colspan="8" style="text-align: center; color: var(--text-secondary);">Loading registrations...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div id="registrationsPagination" class="pagination"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div id="addWarrantyModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('addWarrantyModal')">&times;</span>
+            <h3 style="color: var(--accent-primary); margin-bottom: 24px;">➕ Add Warranty Number</h3>
+            <form id="addWarrantyForm">
+                <div class="form-group">
+                    <label for="warrantyNumber">Warranty Number:</label>
+                    <input type="text" id="warrantyNumber" pattern="[0-9]{4,5}" required placeholder="Enter 4-5 digits">
+                    <small style="color: var(--text-muted);">4-5 digits only</small>
+                </div>
+                <div class="form-group">
+                    <label for="productId">Product:</label>
+                    <select id="productId" required>
+                        <option value="">Select Product</option>
+                        <option value="th11">TH11 Headset</option>
+                        <option value="g7">G7 Headset</option>
+                        <option value="g10">G10 Headset</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="productName">Product Name:</label>
+                    <input type="text" id="productName" readonly style="background: var(--bg-secondary);">
+                </div>
+                <div class="button-group" style="justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('addWarrantyModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Add Warranty Number</button>
+                </div>
+            </form>
+            <div id="addWarrantyError" class="alert alert-error hidden"></div>
+            <div id="addWarrantySuccess" class="alert alert-success hidden"></div>
+        </div>
+    </div>
+
+    <div id="editRegistrationModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('editRegistrationModal')">&times;</span>
+            <h3 style="color: var(--accent-primary); margin-bottom: 24px;">✏️ Edit Warranty Registration</h3>
+            <form id="editRegistrationForm">
+                <input type="hidden" id="editRegistrationId">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editFirstName">First Name:</label>
+                        <input type="text" id="editFirstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editLastName">Last Name:</label>
+                        <input type="text" id="editLastName" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editEmail">Email:</label>
+                    <input type="email" id="editEmail" required>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editProduct">Product:</label>
+                        <select id="editProduct" required>
+                            <option value="th11">TH11 Headset</option>
+                            <option value="g7">G7 Headset</option>
+                            <option value="g10">G10 Headset</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="editSource">Purchase Source:</label>
+                        <select id="editSource" required>
+                            <option value="Amazon.ca">Amazon.ca</option>
+                            <option value="Best Buy">Best Buy</option>
+                            <option value="LDAS.ca">LDAS.ca</option>
+                            <option value="Walmart">Walmart</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="editOrderId">Order ID:</label>
+                        <input type="text" id="editOrderId" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="editWarrantyNumber">Warranty Number:</label>
+                        <input type="text" id="editWarrantyNumber" pattern="[0-9]{4,5}" required readonly style="background: var(--bg-secondary);">
+                        <small style="color: var(--text-muted);">Warranty number cannot be changed</small>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="editPurchaseDate">Purchase Date:</label>
+                    <input type="date" id="editPurchaseDate" required>
+                </div>
+                <div class="form-group">
+                    <label for="editStatus">Status:</label>
+                    <select id="editStatus" required>
+                        <option value="active">Active</option>
+                        <option value="expired">Expired</option>
+                        <option value="claimed">Claimed</option>
+                    </select>
+                </div>
+                <div class="button-group" style="justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('editRegistrationModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Update Registration</button>
+                </div>
+            </form>
+            <div id="editRegistrationError" class="alert alert-error hidden"></div>
+            <div id="editRegistrationSuccess" class="alert alert-success hidden"></div>
+        </div>
+    </div>
+
+    <div id="deleteConfirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('deleteConfirmModal')">&times;</span>
+            <h3 style="color: var(--error); margin-bottom: 24px;">⚠️ Confirm Deletion</h3>
+            <div class="confirmation-dialog">
+                <h4 style="color: var(--error); margin-bottom: 12px;">Are you sure?</h4>
+                <p id="deleteConfirmText" style="color: var(--text-secondary); margin-bottom: 20px;">This action cannot be undone.</p>
+                <div class="button-group" style="justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="closeModal('deleteConfirmModal')">Cancel</button>
+                    <button id="confirmDeleteBtn" class="btn btn-danger">Yes, Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="unlinkConfirmModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('unlinkConfirmModal')">&times;</span>
+            <h3 style="color: var(--warning); margin-bottom: 24px;">🔗 Unlink Warranty Number</h3>
+            <div class="confirmation-dialog">
+                <h4 style="color: var(--warning); margin-bottom: 12px;">Unlink Warranty Number?</h4>
+                <p id="unlinkConfirmText" style="color: var(--text-secondary); margin-bottom: 20px;">This will make the warranty number available for reuse.</p>
+                <div class="button-group" style="justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="closeModal('unlinkConfirmModal')">Cancel</button>
+                    <button id="confirmUnlinkBtn" class="btn btn-warning">Yes, Unlink</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="processClaimModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeModal('processClaimModal')">&times;</span>
+            <h3 style="color: var(--accent-primary); margin-bottom: 24px;">🛠️ Process Warranty Claim</h3>
+            <div id="claimCustomerInfo"></div>
+            <form id="processClaimForm">
+                <input type="hidden" id="claimRegistrationId">
+                <div class="form-group">
+                    <label for="claimType">Claim Type:</label>
+                    <select id="claimType" required>
+                        <option value="">Select Claim Type</option>
+                        <option value="replacement">Product Replacement</option>
+                        <option value="repair">Product Repair</option>
+                        <option value="refund">Refund Request</option>
+                        <option value="technical">Technical Support</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="claimNotes">Claim Notes:</label>
+                    <textarea id="claimNotes" rows="4" placeholder="Enter details about the warranty claim..."></textarea>
+                </div>
+                <div class="button-group" style="justify-content: flex-end;">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal('processClaimModal')">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Process Claim</button>
+                </div>
+            </form>
+            <div id="claimError" class="alert alert-error hidden"></div>
+            <div id="claimSuccess" class="alert alert-success hidden"></div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = 'https://ldas-warranty-system.onrender.com/api';
+        let currentToken = localStorage.getItem('adminToken');
+        let currentPage = 1;
+        let debounceTimer;
+        let searchDebounceTimer;
+        let currentEditingId = null;
+        let currentActionType = null;
+
+        function initializeTheme() {
+            const savedTheme = localStorage.getItem('theme') || 'light';
+            document.documentElement.setAttribute('data-theme', savedTheme);
+            updateThemeToggle(savedTheme);
+        }
+
+        function toggleTheme() {
+            const currentTheme = document.documentElement.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            document.documentElement.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateThemeToggle(newTheme);
+        }
+
+        function updateThemeToggle(theme) {
+            const themeIcon = document.getElementById('themeIcon');
+            const themeText = document.getElementById('themeText');
+            if (theme === 'dark') {
+                themeIcon.textContent = '☀️';
+                themeText.textContent = 'Light Mode';
+            } else {
+                themeIcon.textContent = '🌙';
+                themeText.textContent = 'Dark Mode';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeTheme();
+            if (currentToken) {
+                showAdminPanel();
+                loadDashboard();
+            } else {
+                showLogin();
+            }
+            setupProductNameMapping();
+        });
+
+        function showLogin() {
+            document.getElementById('loginContainer').classList.remove('hidden');
+            document.getElementById('adminPanel').classList.add('hidden');
+        }
+
+        function showAdminPanel() {
+            document.getElementById('loginContainer').classList.add('hidden');
+            document.getElementById('adminPanel').classList.remove('hidden');
+        }
+
+        document.getElementById('loginForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            try {
+                const response = await fetch(API_BASE + '/admin/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ username, password })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    currentToken = data.token;
+                    localStorage.setItem('adminToken', currentToken);
+                    document.getElementById('welcomeText').textContent = 'Welcome, ' + data.admin.username;
+                    document.getElementById('userAvatar').textContent = data.admin.username.charAt(0).toUpperCase();
+                    showAdminPanel();
+                    loadDashboard();
+                } else {
+                    showError('loginError', data.error);
+                }
+            } catch (error) {
+                showError('loginError', 'Login failed. Please try again.');
+            }
+        });
+
+        function logout() {
+            localStorage.removeItem('adminToken');
+            currentToken = null;
+            showLogin();
+            document.getElementById('loginForm').reset();
+        }
+
+        function switchTab(evt, tabName) {
+            const tabcontent = document.getElementsByClassName('tab-pane');
+            for (let i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove('active');
+            }
+            const tablinks = document.getElementsByClassName('tab');
+            for (let i = 0; i < tablinks.length; i++) {
+                tablinks[i].classList.remove('active');
+            }
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+            document.getElementById(tabName).classList.add('fade-in');
+            if (tabName === 'warranty-numbers') {
+                loadWarrantyNumbers();
+            } else if (tabName === 'registrations') {
+                loadRegistrations();
+            } else if (tabName === 'customer-search') {
+                resetSearch();
+            }
+        }
+
+        function resetSearch() {
+            document.getElementById('searchQuery').value = '';
+            document.getElementById('searchResults').innerHTML = '<div class="no-results"><i>🔍</i><h4>Ready to Search</h4><p>Enter a search term above to find customer warranty information</p></div>';
+        }
+
+        async function loadDashboard() {
+            try {
+                const response = await fetch(API_BASE + '/admin/stats', {
+                    headers: { 'Authorization': 'Bearer ' + currentToken }
+                });
+                if (response.ok) {
+                    const stats = await response.json();
+                    displayStats(stats);
+                } else {
+                    console.error('Failed to load stats');
+                }
+            } catch (error) {
+                console.error('Failed to load dashboard:', error);
+            }
+        }
+
+        function displayStats(stats) {
+            const statsGrid = document.getElementById('statsGrid');
+            statsGrid.innerHTML = '<div class="stat-card"><div class="stat-number">' + (stats.totalWarrantyNumbers || 0) + '</div><div class="stat-label">Total Warranty Numbers</div></div>' +
+                '<div class="stat-card"><div class="stat-number">' + (stats.availableWarrantyNumbers || 0) + '</div><div class="stat-label">Available Numbers</div></div>' +
+                '<div class="stat-card"><div class="stat-number">' + (stats.totalRegistrations || 0) + '</div><div class="stat-label">Total Registrations</div></div>' +
+                '<div class="stat-card"><div class="stat-number">' + (stats.activeWarranties || 0) + '</div><div class="stat-label">Active Warranties</div></div>' +
+                '<div class="stat-card"><div class="stat-number">' + (stats.recentRegistrations || 0) + '</div><div class="stat-label">Recent (7 days)</div></div>' +
+                (stats.claimsOverview ? '<div class="stat-card"><div class="stat-number">' + (stats.claimsOverview.totalClaims || 0) + '</div><div class="stat-label">Total Claims</div></div>' : '');
+        }
+
+        function debounceCustomerSearch() {
+            clearTimeout(searchDebounceTimer);
+            searchDebounceTimer = setTimeout(() => { performCustomerSearch(); }, 500);
+        }
+
+        async function performCustomerSearch() {
+            const query = document.getElementById('searchQuery').value.trim();
+            const searchType = document.getElementById('searchType').value;
+            const resultsContainer = document.getElementById('searchResults');
+            if (!query) {
+                resetSearch();
+                return;
+            }
+            resultsContainer.innerHTML = '<div class="no-results"><i>⏳</i><h4>Searching...</h4><p>Looking for customer warranty information</p></div>';
+            try {
+                let searchUrl = API_BASE + '/admin/registrations?limit=50';
+                switch(searchType) {
+                    case 'email': searchUrl += '&email=' + encodeURIComponent(query); break;
+                    case 'warranty': searchUrl += '&warrantyNumber=' + encodeURIComponent(query); break;
+                    case 'order': searchUrl += '&orderId=' + encodeURIComponent(query); break;
+                    case 'name': searchUrl += '&name=' + encodeURIComponent(query); break;
+                    default: searchUrl += '&search=' + encodeURIComponent(query);
+                }
+                const response = await fetch(searchUrl, {
+                    headers: { 'Authorization': 'Bearer ' + currentToken }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    displaySearchResults(data.registrations, query);
+                } else {
+                    throw new Error('Search failed');
+                }
+            } catch (error) {
+                console.error('Search error:', error);
+                resultsContainer.innerHTML = '<div class="no-results"><i>❌</i><h4>Search Error</h4><p>Unable to perform search. Please try again.</p></div>';
+            }
+        }
+
+        function displaySearchResults(registrations, query) {
+            const resultsContainer = document.getElementById('searchResults');
+            if (registrations.length === 0) {
+                resultsContainer.innerHTML = '<div class="no-results"><i>🔭</i><h4>No Results Found</h4><p>No warranty registrations found for "' + query + '"</p></div>';
+                return;
+            }
+            const resultsHTML = registrations.map(reg => {
+                const warrantyEndDate = new Date(reg.warrantyEndDate);
+                const isExpired = warrantyEndDate < new Date();
+                const daysRemaining = Math.ceil((warrantyEndDate - new Date()) / (1000 * 60 * 60 * 24));
+                const status = isExpired ? 'expired' : reg.status;
+                return '<div class="customer-card"><div class="customer-header"><div class="customer-info"><h4>' + reg.fullName + '</h4><p>✉️ ' + reg.email + '</p></div><div><span class="status-badge status-' + status + '">' + status.charAt(0).toUpperCase() + status.slice(1) + '</span></div></div><div class="warranty-info"><div class="warranty-detail"><strong>Product</strong><span>' + reg.product + '</span></div><div class="warranty-detail"><strong>Warranty Number</strong><span>' + (reg.warrantyNumber || 'N/A') + '</span></div><div class="warranty-detail"><strong>Purchase Date</strong><span>' + new Date(reg.purchaseDate).toLocaleDateString() + '</span></div><div class="warranty-detail"><strong>Purchase Source</strong><span>' + reg.source + '</span></div><div class="warranty-detail"><strong>Order ID</strong><span>' + reg.orderId + '</span></div><div class="warranty-detail"><strong>Warranty Expires</strong><span>' + warrantyEndDate.toLocaleDateString() + ' ' + (isExpired ? '(Expired)' : '(' + daysRemaining + ' days)') + '</span></div></div><div style="margin-top: 16px; display: flex; gap: 8px; flex-wrap: wrap;"><button class="btn btn-primary btn-sm" onclick="editRegistration(\'' + reg._id + '\')">✏️ Edit</button><button class="btn btn-info btn-sm" onclick="processWarrantyClaim(\'' + reg._id + '\')">🛠️ Process Claim</button>' + (reg.warrantyNumber ? '<button class="btn btn-warning btn-sm" onclick="unlinkWarranty(\'' + reg._id + '\', \'' + reg.warrantyNumber + '\')">🔗 Unlink</button>' : '') + '<button class="btn btn-danger btn-sm" onclick="deleteRegistration(\'' + reg._id + '\', \'' + reg.fullName + '\')">🗑️ Delete</button></div></div>';
+            }).join('');
+            resultsContainer.innerHTML = '<div style="margin-bottom: 24px;"><h4 style="color: var(--text-primary);">Search Results (' + registrations.length + ' found)</h4><p style="color: var(--text-secondary);">Found ' + registrations.length + ' warranty registration(s) for "' + query + '"</p></div>' + resultsHTML;
+        }
+
+        async function loadWarrantyNumbers(page = 1) {
+            try {
+                const productFilter = document.getElementById('productFilter').value;
+                const statusFilter = document.getElementById('statusFilter').value;
+                let url = API_BASE + '/admin/warranty-numbers?page=' + page + '&limit=20';
+                if (productFilter) url += '&productId=' + productFilter;
+                if (statusFilter !== '') url += '&isUsed=' + statusFilter;
+                const response = await fetch(url, {
+                    headers: { 'Authorization': 'Bearer ' + currentToken }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    displayWarrantyNumbers(data.warrantyNumbers);
+                    displayPagination('warrantyPagination', data.pagination, loadWarrantyNumbers);
+                } else {
+                    console.error('Failed to load warranty numbers');
+                }
+            } catch (error) {
+                console.error('Failed to load warranty numbers:', error);
+            }
+        }
+
+        function displayWarrantyNumbers(warrantyNumbers) {
+            const tbody = document.getElementById('warrantyNumbersBody');
+            if (warrantyNumbers.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" style="text-align: center; color: var(--text-secondary);">No warranty numbers found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = warrantyNumbers.map(wn => 
+                '<tr><td>' + wn.warrantyNumber + '</td><td>' + wn.productName + '</td><td><span class="status-badge ' + 
+                (wn.isUsed ? 'status-used' : 'status-unused') + '">' + (wn.isUsed ? 'Used' : 'Available') + 
+                '</span></td><td>' + new Date(wn.createdAt).toLocaleDateString() + '</td><td>' + 
+                (wn.registrationId ? wn.registrationId.fullName : '-') + '</td></tr>'
+            ).join('');
+        }
+
+        async function loadRegistrations(page = 1) {
+            try {
+                const productFilter = document.getElementById('regProductFilter').value;
+                const statusFilter = document.getElementById('regStatusFilter').value;
+                const emailFilter = document.getElementById('emailFilter').value;
+                let url = API_BASE + '/admin/registrations?page=' + page + '&limit=20';
+                if (productFilter) url += '&productId=' + productFilter;
+                if (statusFilter) url += '&status=' + statusFilter;
+                if (emailFilter) url += '&email=' + emailFilter;
+                const response = await fetch(url, {
+                    headers: { 'Authorization': 'Bearer ' + currentToken }
+                });
+                if (response.ok) {
+                    const data = await response.json();
+                    displayRegistrations(data.registrations);
+                    displayPagination('registrationsPagination', data.pagination, loadRegistrations);
+                } else {
+                    console.error('Failed to load registrations');
+                }
+            } catch (error) {
+                console.error('Failed to load registrations:', error);
+            }
+        }
+
+        function displayRegistrations(registrations) {
+            const tbody = document.getElementById('registrationsBody');
+            if (registrations.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="8" style="text-align: center; color: var(--text-secondary);">No registrations found</td></tr>';
+                return;
+            }
+            tbody.innerHTML = registrations.map(reg => {
+                const warrantyEndDate = new Date(reg.warrantyEndDate);
+                const isExpired = warrantyEndDate < new Date();
+                const status = isExpired && reg.status === 'active' ? 'expired' : reg.status;
+                return '<tr><td>' + reg.fullName + '</td><td>' + reg.email + '</td><td>' + reg.product + '</td><td>' + 
+                       (reg.warrantyNumber || 'N/A') + '</td><td>' + new Date(reg.purchaseDate).toLocaleDateString() + 
+                       '</td><td><span class="status-badge status-' + status + '">' + status.charAt(0).toUpperCase() + 
+                       status.slice(1) + '</span></td><td>' + new Date(reg.createdAt).toLocaleDateString() + 
+                       '</td><td class="actions-column"><button class="btn btn-primary btn-sm" onclick="editRegistration(\'' + 
+                       reg._id + '\')">Edit</button><button class="btn btn-info btn-sm" onclick="processWarrantyClaim(\'' + 
+                       reg._id + '\')">Claim</button>' + (reg.warrantyNumber ? '<button class="btn btn-warning btn-sm" onclick="unlinkWarranty(\'' + 
+                       reg._id + '\', \'' + reg.warrantyNumber + '\')">Unlink</button>' : '') + 
+                       '<button class="btn btn-danger btn-sm" onclick="deleteRegistration(\'' + reg._id + '\', \'' + 
+                       reg.fullName + '\')">Delete</button></td></tr>';
+            }).join('');
+        }
+
+        async function editRegistration(registrationId) {
+            try {
+                const response = await fetch(API_BASE + '/admin/registrations/' + registrationId, {
+                    headers: { 'Authorization': 'Bearer ' + currentToken }
+                });
+                if (response.ok) {
+                    const registration = await response.json();
+                    populateEditForm(registration);
+                    document.getElementById('editRegistrationModal').style.display = 'block';
+                } else {
+                    alert('Failed to load registration details');
+                }
+            } catch (error) {
+                console.error('Error loading registration:', error);
+                alert('Failed to load registration details');
+            }
+        }
+
+        function populateEditForm(registration) {
+            document.getElementById('editRegistrationId').value = registration._id;
+            document.getElementById('editFirstName').value = registration.firstName;
+            document.getElementById('editLastName').value = registration.lastName;
+            document.getElementById('editEmail').value = registration.email;
+            document.getElementById('editProduct').value = registration.productId;
+            document.getElementById('editSource').value = registration.source;
+            document.getElementById('editOrderId').value = registration.orderId;
+            document.getElementById('editWarrantyNumber').value = registration.warrantyNumber || '';
+            document.getElementById('editPurchaseDate').value = registration.purchaseDate.split('T')[0];
+            document.getElementById('editStatus').value = registration.status;
+        }
+
+        function processWarrantyClaim(registrationId) {
+            currentEditingId = registrationId;
+            fetch(API_BASE + '/admin/registrations/' + registrationId, {
+                headers: { 'Authorization': 'Bearer ' + currentToken }
+            })
+            .then(response => response.json())
+            .then(registration => {
+                const claimInfo = document.getElementById('claimCustomerInfo');
+                claimInfo.innerHTML = '<div class="alert alert-info"><h4>📋 Warranty Claim for ' + registration.fullName + 
+                    '</h4><p><strong>Product:</strong> ' + registration.product + '</p><p><strong>Warranty #:</strong> ' + 
+                    registration.warrantyNumber + '</p><p><strong>Purchase Date:</strong> ' + 
+                    new Date(registration.purchaseDate).toLocaleDateString() + '</p><p><strong>Email:</strong> ' + 
+                    registration.email + '</p></div>';
+                document.getElementById('claimRegistrationId').value = registrationId;
+                document.getElementById('processClaimModal').style.display = 'block';
+            })
+            .catch(error => {
+                console.error('Error loading registration for claim:', error);
+                alert('Failed to load registration details');
+            });
+        }
+
+        function deleteRegistration(registrationId, customerName) {
+            currentEditingId = registrationId;
+            currentActionType = 'delete';
+            document.getElementById('deleteConfirmText').textContent = 
+                'Are you sure you want to delete the warranty registration for ' + customerName + '? This action cannot be undone and will make the warranty number available for reuse.';
+            document.getElementById('deleteConfirmModal').style.display = 'block';
+        }
+
+        function unlinkWarranty(registrationId, warrantyNumber) {
+            currentEditingId = registrationId;
+            currentActionType = 'unlink';
+            document.getElementById('unlinkConfirmText').textContent = 
+                'Are you sure you want to unlink warranty number ' + warrantyNumber + '? This will remove the registration and make the warranty number available for reuse by another customer.';
+            document.getElementById('unlinkConfirmModal').style.display = 'block';
+        }
+
+        function openAddWarrantyModal() {
+            document.getElementById('addWarrantyModal').style.display = 'block';
+        }
+
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+            if (modalId === 'addWarrantyModal') {
+                document.getElementById('addWarrantyForm').reset();
+                hideAlert('addWarrantyError');
+                hideAlert('addWarrantySuccess');
+            }
+            if (modalId === 'editRegistrationModal') {
+                document.getElementById('editRegistrationForm').reset();
+                hideAlert('editRegistrationError');
+                hideAlert('editRegistrationSuccess');
+            }
+            if (modalId === 'processClaimModal') {
+                document.getElementById('processClaimForm').reset();
+                hideAlert('claimError');
+                hideAlert('claimSuccess');
+            }
+            currentEditingId = null;
+            currentActionType = null;
+        }
+
+        async function exportRegistrations() {
+            try {
+                const response = await fetch(API_BASE + '/admin/export/registrations', {
+                    headers: { 'Authorization': 'Bearer ' + currentToken }
+                });
+                if (response.ok) {
+                    const blob = await response.blob();
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = 'warranty_registrations.csv';
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                } else {
+                    alert('Export failed');
+                }
+            } catch (error) {
+                alert('Export failed: ' + error.message);
+            }
+        }
+
+        function debounceLoadRegistrations() {
+            clearTimeout(debounceTimer);
+            debounceTimer = setTimeout(() => { loadRegistrations(1); }, 500);
+        }
+
+        function setupProductNameMapping() {
+            const productSelect = document.getElementById('productId');
+            const productNameInput = document.getElementById('productName');
+            const productNames = {
+                'th11': 'LDAS TH11 Headset',
+                'g7': 'LDAS G7 Headset',
+                'g10': 'LDAS G10 Headset'
+            };
+            if (productSelect) {
+                productSelect.addEventListener('change', function() {
+                    productNameInput.value = productNames[this.value] || '';
+                });
+            }
+        }
+
+        function displayPagination(containerId, pagination, loadFunction) {
+            const container = document.getElementById(containerId);
+            if (pagination.pages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            let paginationHTML = '';
+            if (pagination.page > 1) {
+                paginationHTML += '<button class="btn btn-secondary btn-sm" onclick="' + loadFunction.name + '(' + (pagination.page - 1) + ')">Previous</button>';
+            }
+            for (let i = 1; i <= pagination.pages; i++) {
+                if (i === pagination.page) {
+                    paginationHTML += '<button class="btn btn-primary btn-sm">' + i + '</button>';
+                } else {
+                    paginationHTML += '<button class="btn btn-secondary btn-sm" onclick="' + loadFunction.name + '(' + i + ')">' + i + '</button>';
+                }
+            }
+            if (pagination.page < pagination.pages) {
+                paginationHTML += '<button class="btn btn-secondary btn-sm" onclick="' + loadFunction.name + '(' + (pagination.page + 1) + ')">Next</button>';
+            }
+            container.innerHTML = paginationHTML;
+        }
+
+        document.getElementById('addWarrantyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const warrantyNumber = document.getElementById('warrantyNumber').value;
+            const productId = document.getElementById('productId').value;
+            const productName = document.getElementById('productName').value;
+            try {
+                const response = await fetch(API_BASE + '/admin/warranty-numbers', {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': 'Bearer ' + currentToken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ warrantyNumber, productId, productName })
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showSuccess('addWarrantySuccess', 'Warranty number added successfully!');
+                    document.getElementById('addWarrantyForm').reset();
+                    loadWarrantyNumbers();
+                    loadDashboard();
+                } else {
+                    showError('addWarrantyError', data.error);
+                }
+            } catch (error) {
+                showError('addWarrantyError', 'Failed to add warranty number');
+            }
+        });
+
+        document.getElementById('editRegistrationForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const registrationId = document.getElementById('editRegistrationId').value;
+            const updatedData = {
+                firstName: document.getElementById('editFirstName').value.trim(),
+                lastName: document.getElementById('editLastName').value.trim(),
+                email: document.getElementById('editEmail').value.trim(),
+                productId: document.getElementById('editProduct').value,
+                source: document.getElementById('editSource').value,
+                orderId: document.getElementById('editOrderId').value.trim(),
+                purchaseDate: document.getElementById('editPurchaseDate').value,
+                status: document.getElementById('editStatus').value
+            };
+            updatedData.fullName = updatedData.firstName + ' ' + updatedData.lastName;
+            const productNames = {
+                'th11': 'LDAS TH11 Headset',
+                'g7': 'LDAS G7 Headset',
+                'g10': 'LDAS G10 Headset'
+            };
+            updatedData.product = productNames[updatedData.productId];
+            try {
+                const response = await fetch(API_BASE + '/admin/registrations/' + registrationId, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + currentToken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(updatedData)
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    showSuccess('editRegistrationSuccess', 'Registration updated successfully!');
+                    setTimeout(() => {
+                        closeModal('editRegistrationModal');
+                        loadRegistrations();
+                        loadDashboard();
+                    }, 1500);
+                } else {
+                    showError('editRegistrationError', data.error || 'Failed to update registration');
+                }
+            } catch (error) {
+                console.error('Error updating registration:', error);
+                showError('editRegistrationError', 'Failed to update registration');
+            }
+        });
+
+        document.getElementById('processClaimForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            const registrationId = document.getElementById('claimRegistrationId').value;
+            const claimType = document.getElementById('claimType').value;
+            const claimNotes = document.getElementById('claimNotes').value;
+            try {
+                const response = await fetch(API_BASE + '/admin/registrations/' + registrationId, {
+                    method: 'PUT',
+                    headers: {
+                        'Authorization': 'Bearer ' + currentToken,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        status: 'claimed',
+                        claimType: claimType,
+                        claimNotes: claimNotes,
+                        claimDate: new Date().toISOString()
+                    })
+                });
+                if (response.ok) {
+                    showSuccess('claimSuccess', 'Warranty claim processed successfully!');
+                    setTimeout(() => {
+                        closeModal('processClaimModal');
+                        performCustomerSearch();
+                        loadDashboard();
+                    }, 1500);
+                } else {
+                    const data = await response.json();
+                    showError('claimError', data.error || 'Failed to process claim');
+                }
+            } catch (error) {
+                console.error('Error processing claim:', error);
+                showError('claimError', 'Failed to process warranty claim');
+            }
+        });
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', async function() {
+            if (currentActionType !== 'delete' || !currentEditingId) return;
+            try {
+                const response = await fetch(API_BASE + '/admin/registrations/' + currentEditingId, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': 'Bearer ' + currentToken }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    closeModal('deleteConfirmModal');
+                    alert('Registration deleted successfully!');
+                    loadRegistrations();
+                    performCustomerSearch();
+                    loadDashboard();
+                } else {
+                    alert(data.error || 'Failed to delete registration');
+                }
+            } catch (error) {
+                console.error('Error deleting registration:', error);
+                alert('Failed to delete registration');
+            } finally {
+                currentEditingId = null;
+                currentActionType = null;
+            }
+        });
+
+        document.getElementById('confirmUnlinkBtn').addEventListener('click', async function() {
+            if (currentActionType !== 'unlink' || !currentEditingId) return;
+            try {
+                const response = await fetch(API_BASE + '/admin/registrations/' + currentEditingId + '/unlink', {
+                    method: 'POST',
+                    headers: { 'Authorization': 'Bearer ' + currentToken }
+                });
+                const data = await response.json();
+                if (response.ok) {
+                    closeModal('unlinkConfirmModal');
+                    alert('Warranty number unlinked successfully!');
+                    loadRegistrations();
+                    loadWarrantyNumbers();
+                    performCustomerSearch();
+                    loadDashboard();
+                } else {
+                    alert(data.error || 'Failed to unlink warranty number');
+                }
+            } catch (error) {
+                console.error('Error unlinking warranty:', error);
+                alert('Failed to unlink warranty number');
+            } finally {
+                currentEditingId = null;
+                currentActionType = null;
+            }
+        });
+
+        function showError(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.classList.remove('hidden');
+            }
+        }
+
+        function showSuccess(elementId, message) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.textContent = message;
+                element.classList.remove('hidden');
+            }
+        }
+
+        function hideAlert(elementId) {
+            const element = document.getElementById(elementId);
+            if (element) {
+                element.classList.add('hidden');
+            }
+        }
+
+        window.onclick = function(event) {
+            const modals = document.getElementsByClassName('modal');
+            for (let modal of modals) {
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            }
+        }
+
+        document.addEventListener('keydown', function(e) {
+            if ((e.ctrlKey || e.metaKey) && e.key === 'f') {
+                e.preventDefault();
+                const searchInput = document.getElementById('searchQuery');
+                if (searchInput) {
+                    searchInput.focus();
+                    switchTab({ currentTarget: document.querySelector('[onclick*="customer-search"]') }, 'customer-search');
+                }
+            }
+            if ((e.ctrlKey || e.metaKey) && e.shiftKey && e.key === 'T') {
+                e.preventDefault();
+                toggleTheme();
+            }
+        });
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LDAS Warranty Admin Portal</title>
+    <style>
+        :root {
+            --bg-primary: #ffffff;
+            --bg-secondary: #f8fafc;
+            --bg-tertiary: #f1f5f9;
+            --text-primary: #0f172a;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --border-color: #e2e8f0;
+            --accent-primary: #3b82f6;
+            --accent-secondary: #06b6d4;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --error: #ef4444;
+            --shadow: rgba(0, 0, 0, 0.1);
+            --shadow-lg: rgba(0, 0, 0, 0.15);
+        }
+
+        [data-theme="dark"] {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --text-primary: #f8fafc;
+            --text-secondary: #cbd5e1;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --accent-primary: #60a5fa;
+            --accent-secondary: #22d3ee;
+            --success: #34d399;
+            --warning: #fbbf24;
+            --error: #f87171;
+            --shadow: rgba(0, 0, 0, 0.3);
+            --shadow-lg: rgba(0, 0, 0, 0.4);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .header h1 {
+            color: var(--accent-primary);
+            font-size: 28px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .header h1::before {
+            content: "⚡";
+            font-size: 32px;
+        }
+
+        .header-controls {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .theme-toggle {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .theme-toggle:hover {
+            background: var(--accent-primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            color: var(--text-secondary);
+        }
+
+        .user-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 12px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            color: white;
+            font-size: 16px;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 4px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(59, 130, 246, 0.4);
+        }
+
+        .btn-secondary {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+        }
+
+        .btn-secondary:hover {
+            background: var(--accent-primary);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, var(--success), #059669);
+            color: white;
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning), #d97706);
+            color: white;
+            box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, var(--error), #dc2626);
+            color: white;
+            box-shadow: 0 4px 12px rgba(239, 68, 68, 0.3);
+        }
+
+        .btn-info {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            color: white;
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .btn-sm {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .login-container {
+            max-width: 420px;
+            margin: 100px auto;
+            background: var(--bg-primary);
+            padding: 48px;
+            border-radius: 24px;
+            box-shadow: 0 20px 40px var(--shadow-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .login-container h2 {
+            text-align: center;
+            margin-bottom: 32px;
+            color: var(--accent-primary);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 24px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .form-group input, .form-group select, .form-group textarea {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .stat-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            padding: 32px;
+            border-radius: 20px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px var(--shadow-lg);
+        }
+
+        .stat-number {
+            font-size: 48px;
+            font-weight: 800;
+            margin-bottom: 12px;
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 16px;
+            font-weight: 600;
+        }
+
+        .tabs {
+            display: flex;
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px 16px 0 0;
+            overflow: hidden;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 20px 24px;
+            background: var(--bg-secondary);
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            color: var(--text-secondary);
+            position: relative;
+        }
+
+        .tab.active {
+            background: var(--bg-primary);
+            color: var(--accent-primary);
+        }
+
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-secondary));
+        }
+
+        .tab:hover:not(.active) {
+            background: var(--bg-tertiary);
+            color: var(--text-primary);
+        }
+
+        .tab-content {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-top: none;
+            padding: 32px;
+            border-radius: 0 0 16px 16px;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .tab-pane {
+            display: none;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        .search-container {
+            background: var(--bg-secondary);
+            border: 2px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 32px;
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        .search-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .search-header h3 {
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 700;
+        }
+
+        .search-form {
+            display: grid;
+            grid-template-columns: 1fr 1fr auto;
+            gap: 16px;
+            align-items: end;
+        }
+
+        .search-input {
+            padding: 16px;
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            font-size: 14px;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
+        }
+
+        .customer-card {
+            background: var(--bg-primary);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 16px;
+            box-shadow: 0 4px 6px var(--shadow);
+            transition: all 0.3s ease;
+        }
+
+        .customer-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px var(--shadow-lg);
+        }
+
+        .customer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 16px;
+        }
+
+        .customer-info h4 {
+            color: var(--text-primary);
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 4px;
+        }
+
+        .customer-info p {
+            color: var(--text-secondary);
+            font-size: 14px;
+        }
+
+        .warranty-info {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .warranty-detail {
+            background: var(--bg-secondary);
+            padding: 16px;
+            border-radius: 12px;
+            border-left: 4px solid var(--accent-primary);
+        }
+
+        .warranty-detail strong {
+            display: block;
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+            font-weight: 600;
+        }
+
+        .warranty-detail span {
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-active {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .status-expired {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .status-claimed {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .status-used {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border: 1px solid rgba(59, 130, 246, 0.2);
+        }
+
+        .status-unused {
+            background: rgba(148, 163, 184, 0.1);
+            color: var(--text-muted);
+            border: 1px solid rgba(148, 163, 184, 0.2);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            margin-top: 24px;
+            border-radius: 16px;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 6px var(--shadow);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--bg-primary);
+        }
+
+        th, td {
+            padding: 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background: var(--bg-secondary);
+            font-weight: 700;
+            color: var(--text-primary);
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        tr:hover {
+            background: var(--bg-secondary);
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .actions-column {
+            width: 250px;
+            text-align: center;
+        }
+
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filters > div {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .pagination button {
+            padding: 8px 12px;
+            border: 1px solid var(--border-color);
+            background: var(--bg-primary);
+            cursor: pointer;
+            border-radius: 8px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+        }
+
+        .pagination button.active {
+            background: var(--accent-primary);
+            color: white;
+            border-color: var(--accent-primary);
+        }
+
+        .pagination button:hover:not(.active) {
+            background: var(--bg-secondary);
+        }
+
+        .alert {
+            padding: 16px 20px;
+            border-radius: 12px;
+            margin: 16px 0;
+            font-weight: 500;
+            border: 1px solid;
+        }
+
+        .alert-success {
+            background: rgba(16, 185, 129, 0.1);
+            color: var(--success);
+            border-color: rgba(16, 185, 129, 0.2);
+        }
+
+        .alert-error {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--error);
+            border-color: rgba(239, 68, 68, 0.2);
+        }
+
+        .alert-warning {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+            border-color: rgba(245, 158, 11, 0.2);
+        }
+
+        .alert-info {
+            background: rgba(59, 130, 246, 0.1);
+            color: var(--accent-primary);
+            border-color: rgba(59, 130, 246, 0.2);
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: var(--bg-primary);
+            margin: 2% auto;
+            padding: 32px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 40px var(--shadow-lg);
+            border: 1px solid var(--border-color);
+        }
+
+        .close {
+            color: var(--text-muted);
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .close:hover {
+            color: var(--error);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+        }
+
+        .confirmation-dialog {
+            background: rgba(245, 158, 11, 0.1);
+            border: 1px solid rgba(245, 158, 11, 0.2);
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .confirmation-dialog h4 {
+            color: var(--warning);
+            margin-bottom: 10px;
+        }
+
+        .confirmation-dialog p {
+            color: var(--text-secondary);
+            margin-bottom: 15px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 48px;
+            color: var(--text-secondary);
+        }
+
+        .no-results i {
+            font-size: 48px;
+            margin-bottom: 16px;
+            display: block;
+            opacity: 0.5;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 20px;
+                text-align: center;
+            }
+
+            .search-form {
+                grid-template-columns: 1fr;
+            }
+
+            .warranty-info {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .tabs {
+                flex-direction: column;
+            }
+
+            .tab {
+                border-bottom: 1px solid var(--border-color);
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .actions-column {
+                width: auto;
+            }
+
+            .btn-sm {
+                padding: 4px 8px;
+                font-size: 11px;
+            }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease-out;
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--text-muted);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--accent-primary);
+        }
+    </style>
+</head>
+<body>
+    <!-- Login Form -->
+    <div id="loginContainer" class="login-container fade-in">
+        <h2>🔐 Admin Login</h2>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" id="username" required placeholder="Enter your username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password:</label>
+                <input type="password" id="password" required placeholder="Enter your password">
+            </div>
+            <button type="submit" class="btn btn-primary" style="width: 100%;">
+                🚀 Sign In
+            </button>
+        </form>
+        <div id="loginError" class="alert alert-error hidden"></div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div id="adminPanel" class="hidden">
+        <div class="container">
+            <div class="header fade-in">
+                <h1>LDAS Warranty Portal</h1>
+                <div class="header-controls">
+                    <div class="theme-toggle" onclick="toggleTheme()">
+                        <span id="themeIcon">🌙</span>
+                        <span id="themeText">Dark Mode</span>
+                    </div>
+                    <div class="user-info">
